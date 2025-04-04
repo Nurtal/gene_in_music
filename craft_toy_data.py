@@ -3,13 +3,14 @@ import pandas as pd
 import os
 
 
-def craft_toy_data(nb_patient_group_a:int, nb_patient_group_b:int) -> None:
+def craft_toy_data(nb_patient_group_a:int, nb_patient_group_b:int, nb_noisy_genes:int) -> None:
     """Craft a toy dataset with 2 groups describe by 10 'genes'.
     Save result file in data subfolder, create it of not exist
 
     Args:
         - nb_patient_group_a (int) : number of patient in group a
         - nb_patient_group_b (int) : number of patient in group b
+        - nb_noisy_genes (int) : number of noisy genes to add
     
     """
 
@@ -35,6 +36,10 @@ def craft_toy_data(nb_patient_group_a:int, nb_patient_group_b:int) -> None:
             "D1":random.randint(0,100),
         }
 
+        # add noisy gene
+        for x in range(nb_noisy_genes):
+            vector[f"N{x}"] = random.randint(8,12)
+
         # update cmpt
         cmpt +=1
 
@@ -59,6 +64,10 @@ def craft_toy_data(nb_patient_group_a:int, nb_patient_group_b:int) -> None:
             "D1":random.randint(0,100),
         }
 
+        # add noisy gene
+        for x in range(nb_noisy_genes):
+            vector[f"N{x}"] = random.randint(8,12)
+
         # update cmpt
         cmpt +=1
 
@@ -75,7 +84,6 @@ def craft_toy_data(nb_patient_group_a:int, nb_patient_group_b:int) -> None:
     df.to_csv("data/toy_data.csv", index=False)
 
 
-
 if __name__ == "__main__":
 
-    craft_toy_data(100, 100)
+    craft_toy_data(100, 100, 25)

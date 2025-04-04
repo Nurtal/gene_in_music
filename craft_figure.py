@@ -36,4 +36,4 @@ def plot_signal(signal_file:str, image_file:str) -> None:
 
 if __name__ == "__main__":
 
-    plot_signal("signals/136_signal.csv")
+    plot_signal("signals/136_signal.csv", "test.png")
