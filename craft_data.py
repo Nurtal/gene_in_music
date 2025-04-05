@@ -1,4 +1,6 @@
 import pandas as pd
+from functools import reduce
+import random
 
 
 def read_gct(filepath:str) -> pd.DataFrame:
@@ -21,10 +23,35 @@ def read_gct(filepath:str) -> pd.DataFrame:
     return df
 
 
+def pick_random_genes(gct_file_list:list, n_pick:int) -> list:
+    """Pick a random set of genes among the genes shared bythe gct files in gct_file_list
+
+    Args:
+        - gct_file_list (list) : list of path for gct files
+        - n_pick (int) : number of gene to randomly pick
+
+    Returns:
+        - (list) : list of picked genes
+    
+    """
+
+    # look for genes in data
+    gene_list_list = []
+    for gct_file in gct_file_list:
+        df = read_gct(gct_file)
+        gene_list_list.append(list(df['Name']))
+
+    # compute intersection
+    gene_list = list(reduce(lambda a, b: set(a) & set(b), gene_list_list))
+    
+    # random pick
+    gene_list = random.sample(gene_list, n_pick)
+
+    return gene_list
+
+
 
 if __name__ == "__main__":
 
 
-    df = read_gct("data/gene_reads_artery_aorta.gct")
-
-    print(df)
+    pick_random_genes(["data/gene_reads_artery_aorta.gct", "data/gene_reads_artery_coronary.gct"], 5)
