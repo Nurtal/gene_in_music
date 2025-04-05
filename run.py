@@ -1,8 +1,11 @@
+# usual import
 import os
 import glob
 
+# import module
 import craft_toy_data
 import build_signal
+import simple_clf
 
 
 def toy_run():
@@ -24,10 +27,18 @@ def toy_run():
     for signal_file in glob.glob("signals/*.csv"):
         build_signal.turn_signal_into_audio(signal_file, 4.0)
 
+    # prepare data for classification
+    file_list_a = []
+    file_list_b = []
+    for audio_file in glob.glob("signals/*.wav"):
+        nb = int(audio_file.split("/")[1].split("_")[0])
+        if nb < 50:
+            file_list_a.append(audio_file)
+        else:
+            file_list_b.append(audio_file)
+            
     # run classification
-
-    # display results
-
+    simple_clf.run_svm_clf(file_list_a, file_list_b)
 
 
 
