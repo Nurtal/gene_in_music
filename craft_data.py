@@ -74,9 +74,13 @@ def craft_reduce_datasets(gct_file_list:list, n_genes:int) -> None:
         df = df.rename(columns={'Name':'ID'})
         df = df.set_index('ID')
         df = df.T
+        df['ID'] = df.index
+        cols = df.columns.tolist()
+        new_order = [cols[-1]] + cols[:-1]
+        df = df[new_order]
 
         # save
-        df.to_csv(gct_file.replace(".gct", ".csv"))
+        df.to_csv(gct_file.replace(".gct", ".csv"), index=False)
 
 
 
@@ -108,9 +112,13 @@ def craft_datasets(gct_file_list:list) -> None:
         df = df.rename(columns={'Name':'ID'})
         df = df.set_index('ID')
         df = df.T
+        df['ID'] = df.index
+        cols = df.columns.tolist()
+        new_order = [cols[-1]] + cols[:-1]
+        df = df[new_order]
 
         # save
-        df.to_csv(gct_file.replace(".gct", ".csv"))
+        df.to_csv(gct_file.replace(".gct", ".csv"), index=False)
 
     
 

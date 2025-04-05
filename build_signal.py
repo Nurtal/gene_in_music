@@ -5,12 +5,13 @@ import os
 from scipy.io.wavfile import write
 from scipy.interpolate import interp1d
 
-def build_random_signal(data_file:str):
+def build_random_signal(data_file:str, output_folder:str):
     """Build signals from data file, assign random order and random interval to genes
     Create one signal file per patient
 
     Args:
         - data_file (str) : path to the data_file
+        - output_folder (str) : path to the output folder
     
     """
 
@@ -42,8 +43,8 @@ def build_random_signal(data_file:str):
         id_to_y[row['ID']] = y
 
     # craft & save signal
-    if not os.path.isdir("signals"):
-        os.mkdir("signals")
+    if not os.path.isdir(output_folder):
+        os.mkdir(output_folder)
 
     # loop over patients
     for i in id_to_y:
@@ -53,7 +54,7 @@ def build_random_signal(data_file:str):
         y = id_to_y[i]
 
         # save signal in file
-        output_file = open(f"signals/{i}_signal.csv", "w")
+        output_file = open(f"{output_folder}/{i}_signal.csv", "w")
         output_file.write("x,y\n")
         for x in x_positions:
             output_file.write(f"{x},{y[cmpt]}\n")
