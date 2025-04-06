@@ -6,6 +6,7 @@ from scipy.io.wavfile import write
 from scipy.interpolate import interp1d
 from mygene import MyGeneInfo
 import requests
+from itertools import chain
 
 
 
@@ -73,7 +74,7 @@ def ensembl_to_uniprot(ensembl_ids:list) -> dict:
         - ensembl_ids (list) : list of ensembl id genes
 
     Returns:
-        (dict) : gene ensembl id to protein id 
+        (dict) : gene ensembl id to protein id [!] values can be list
     
     """
 
@@ -114,7 +115,7 @@ def get_string_ids(uniprot_ids:list) -> dict:
     params = {
         'identifiers': identifiers,
         'species': species,
-        'caller_identity': 'your_app_name'  # mets ton nom ou ton projet ici
+        'caller_identity': 'gene_in_music'
     }
 
     # call API
@@ -126,6 +127,32 @@ def get_string_ids(uniprot_ids:list) -> dict:
 
     return uniprot_to_string
 
+
+def get_string_interactions(string_ids:list):
+    """Get interactions between strings ids
+
+    Args:
+        - string_ids (list) : list of string ids
+
+    Returns:
+        - (json) : list of dict containing interaction results
+    
+    """
+
+    # params
+    species=9606
+    identifiers = '\r'.join(string_ids)
+    params = {
+        'identifiers': identifiers,
+        'species': species,
+        'caller_identity': 'gene_in_music'
+    }
+    
+    # call API
+    response = requests.post("https://string-db.org/api/json/network", data=params)
+    
+    # return results
+    return response.json()
 
 
 
@@ -168,8 +195,12 @@ if __name__ == "__main__":
     # build_random_signal("data/toy_data.csv")
     
     # turn_signal_into_audio("signals/42_signal.csv", 4.0)
+
+    df = pd.read_csv("data/gene_reads_artery_aorta.csv")
+    gene_list = list(df.keys())[5:500]
     
-    gene_list = ['ENSG00000100982.12','ENSG00000226580.1','ENSG00000230978.2','ENSG00000160190.14','ENSG00000283051.1','ENSG00000223461.1','ENSG00000184113.10']
     machin = ensembl_to_uniprot(gene_list)
-    truc = get_string_ids(list(machin.values()))
-    print(truc)
+    machin_flat = list(chain.from_iterable(list(machin.values())))
+    truc = get_string_ids(machin_flat)
+    cheesecake = get_string_interactions(list(truc.values()))
+    print(cheesecake)
