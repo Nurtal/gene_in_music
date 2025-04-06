@@ -4,6 +4,8 @@ import random
 import os
 from scipy.io.wavfile import write
 from scipy.interpolate import interp1d
+from mygene import MyGeneInfo
+
 
 def build_random_signal(data_file:str, output_folder:str):
     """Build signals from data file, assign random order and random interval to genes
@@ -63,6 +65,43 @@ def build_random_signal(data_file:str, output_folder:str):
 
 
 
+
+
+def ensembl_to_uniprot(ensembl_ids:list) -> dict:
+    """Get Prot ID from genes ensembl_ids
+
+    Args:
+        - ensembl_ids (list) : list of ensembl id genes
+
+    Returns:
+        (dict) : gene ensembl id to protein id 
+    
+    """
+
+    # drop part after dots in id
+    ensembl_ids = [i.split('.')[0] for i in ensembl_ids]
+
+    # run request
+    mg = MyGeneInfo()
+    results = mg.querymany(ensembl_ids, scopes='ensembl.gene', fields='uniprot', species='human')
+    gene_to_uniprot = {}
+
+    # extract results
+    for res in results:
+        if 'uniprot' in res:
+            up = res['uniprot']
+            if isinstance(up, dict):
+                gene_to_uniprot[res['query']] = up.get('Swiss-Prot') or up.get('TrEMBL')
+            else:
+                gene_to_uniprot[res['query']] = up
+    return gene_to_uniprot
+
+
+
+
+
+
+
 def turn_signal_into_audio(signal_file:str, target_duration:float) -> None:
     """Turn a signal extracted from data file to an audio signal and save it in
     a wave file
@@ -101,5 +140,8 @@ if __name__ == "__main__":
 
     # build_random_signal("data/toy_data.csv")
     
-    turn_signal_into_audio("signals/42_signal.csv", 4.0)
+    # turn_signal_into_audio("signals/42_signal.csv", 4.0)
     
+    gene_list = ['ENSG00000100982.12','ENSG00000226580.1','ENSG00000230978.2','ENSG00000160190.14','ENSG00000283051.1','ENSG00000223461.1','ENSG00000184113.10']
+    machin = ensembl_to_uniprot(gene_list)
+    print(machin)
