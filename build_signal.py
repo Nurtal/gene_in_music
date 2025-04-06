@@ -155,6 +155,41 @@ def get_string_interactions(string_ids:list):
     return response.json()
 
 
+def build_similarity_matrix(interactions) -> pd.DataFrame:
+    """Build a similarity matrix between the identified proteins from interaction extracted
+    with strings API
+
+    Args:
+        - interaction (list) : list of dict, kind of json, obtained from strings API
+
+    Returns:
+        - (pd.DataFrame) : proximity matrix
+    
+    """
+
+    # forge matrix
+    proteins = set()
+    for interaction in interactions:
+        proteins.add(interaction['preferredName_A'])
+        proteins.add(interaction['preferredName_B'])
+    proteins = list(proteins)
+    matrix = pd.DataFrame(index=proteins, columns=proteins, data=0.0)
+
+    # fill matrix
+    for interaction in interactions:
+        p1 = interaction['preferredName_A']
+        p2 = interaction['preferredName_B']
+        score = interaction['score']
+        matrix.at[p1, p2] = score
+        matrix.at[p2, p1] = score
+
+    # fill diagonale
+    for p in proteins:
+        matrix.at[p, p] = 1.0
+
+    return matrix
+
+
 
 def turn_signal_into_audio(signal_file:str, target_duration:float) -> None:
     """Turn a signal extracted from data file to an audio signal and save it in
@@ -203,4 +238,5 @@ if __name__ == "__main__":
     machin_flat = list(chain.from_iterable(list(machin.values())))
     truc = get_string_ids(machin_flat)
     cheesecake = get_string_interactions(list(truc.values()))
-    print(cheesecake)
+    stuff = build_similarity_matrix(cheesecake)
+    print(stuff)
