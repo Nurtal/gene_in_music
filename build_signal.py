@@ -191,6 +191,44 @@ def build_similarity_matrix(interactions) -> pd.DataFrame:
 
 
 
+def build_gene_similarity_matrix(genes, gene_to_proteins, protein_similarity_matrix, output_file):
+    """ [!] Vibe coding sucks
+    Construit une matrice de similarité entre gènes à partir d'une matrice de similarité entre protéines,
+    en prenant le score maximal entre toutes les paires de protéines associées aux deux gènes.
+
+    Params:
+    - genes : liste de gènes Ensembl (sans version)
+    - gene_to_proteins : dict {gene: [prot1, prot2, ...]}  (même une seule prot = liste d’un élément)
+    - protein_similarity_matrix : DataFrame (protéines en lignes & colonnes)
+
+    Return:
+    - gene_similarity_matrix : DataFrame (gènes en lignes & colonnes) avec similarité max entre protéines
+    """
+    
+    # drop part after dots in id
+    genes = [i.split('.')[0] for i in genes]
+
+    # compute matrix
+    gene_matrix = pd.DataFrame(index=genes, columns=genes, data=0.0)
+    for gene1 in genes:
+        for gene2 in genes:
+            prots1 = gene_to_proteins.get(gene1, [])
+            prots2 = gene_to_proteins.get(gene2, [])
+            max_score = 0.0
+
+            for p1 in prots1:
+                for p2 in prots2:
+                    if p1 in protein_similarity_matrix.index and p2 in protein_similarity_matrix.columns:
+                        score = protein_similarity_matrix.at[p1, p2]
+                        max_score = max(max_score, score)
+
+            gene_matrix.at[gene1, gene2] = max_score
+
+    # save matrix
+    gene_matrix.to_csv(output_file)
+
+
+
 def turn_signal_into_audio(signal_file:str, target_duration:float) -> None:
     """Turn a signal extracted from data file to an audio signal and save it in
     a wave file
@@ -231,12 +269,25 @@ if __name__ == "__main__":
     
     # turn_signal_into_audio("signals/42_signal.csv", 4.0)
 
+    # get gene list
     df = pd.read_csv("data/gene_reads_artery_aorta.csv")
     gene_list = list(df.keys())[5:500]
     
-    machin = ensembl_to_uniprot(gene_list)
-    machin_flat = list(chain.from_iterable(list(machin.values())))
-    truc = get_string_ids(machin_flat)
-    cheesecake = get_string_interactions(list(truc.values()))
-    stuff = build_similarity_matrix(cheesecake)
-    print(stuff)
+    # get gene to uniprot
+    gene_to_uniprot = ensembl_to_uniprot(gene_list)
+    gene_to_uniprot_format = {}
+    for gene in gene_to_uniprot:
+        uniprot = gene_to_uniprot[gene]
+        if not isinstance(uniprot, list):
+            gene_to_uniprot_format[gene] = [uniprot]
+        else:
+            gene_to_uniprot_format[gene] = uniprot
+
+    # get proteine to proximity matrix
+    uniprot_flat = list(chain.from_iterable(list(gene_to_uniprot.values())))
+    uniprot_to_strings = get_string_ids(uniprot_flat)
+    interactions = get_string_interactions(list(uniprot_to_strings.values()))
+    uniprot_proximity_matrix = build_similarity_matrix(interactions)
+
+    # compute gene proximity matrix
+    build_gene_similarity_matrix(gene_list, gene_to_uniprot_format, uniprot_proximity_matrix, "data/test.csv")
