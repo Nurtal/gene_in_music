@@ -5,6 +5,8 @@ import os
 from scipy.io.wavfile import write
 from scipy.interpolate import interp1d
 from mygene import MyGeneInfo
+import requests
+
 
 
 def build_random_signal(data_file:str, output_folder:str):
@@ -64,9 +66,6 @@ def build_random_signal(data_file:str, output_folder:str):
         output_file.close()
 
 
-
-
-
 def ensembl_to_uniprot(ensembl_ids:list) -> dict:
     """Get Prot ID from genes ensembl_ids
 
@@ -94,10 +93,38 @@ def ensembl_to_uniprot(ensembl_ids:list) -> dict:
                 gene_to_uniprot[res['query']] = up.get('Swiss-Prot') or up.get('TrEMBL')
             else:
                 gene_to_uniprot[res['query']] = up
+    
     return gene_to_uniprot
 
 
+def get_string_ids(uniprot_ids:list) -> dict:
+    """Use uniprot ids to get string ids
 
+    Args:
+        - uniprot_ids (list) : list of uniprot_ids
+
+    Returns:
+        (dict) : uniprot ids to string id 
+    
+    """
+
+    # params
+    species=9606    
+    identifiers = '\r'.join(uniprot_ids)
+    params = {
+        'identifiers': identifiers,
+        'species': species,
+        'caller_identity': 'your_app_name'  # mets ton nom ou ton projet ici
+    }
+
+    # call API
+    response = requests.post("https://string-db.org/api/json/get_string_ids", data=params)
+    data = response.json()
+
+    # extract data
+    uniprot_to_string = {item['queryItem']: item['stringId'] for item in data}
+
+    return uniprot_to_string
 
 
 
@@ -144,4 +171,5 @@ if __name__ == "__main__":
     
     gene_list = ['ENSG00000100982.12','ENSG00000226580.1','ENSG00000230978.2','ENSG00000160190.14','ENSG00000283051.1','ENSG00000223461.1','ENSG00000184113.10']
     machin = ensembl_to_uniprot(gene_list)
-    print(machin)
+    truc = get_string_ids(list(machin.values()))
+    print(truc)
