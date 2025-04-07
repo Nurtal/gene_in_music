@@ -64,8 +64,8 @@ def simple_random_run():
         build_signal.turn_signal_into_audio(signal_file, audio_duration)
 
     # prepare data for classification
-    fil_list_a = glob.glob("signals/aorta/*.wav")
-    fil_list_a = glob.glob("signals/coronary/*.wav")
+    file_list_a = glob.glob("signals/aorta/*.wav")
+    file_list_a = glob.glob("signals/coronary/*.wav")
 
     # run classification
     simple_clf.run_svm_clf(file_list_a, file_list_b)
@@ -97,8 +97,8 @@ def simple_reduced_run():
         build_signal.turn_signal_into_audio(signal_file, audio_duration)
 
     # prepare data for classification
-    fil_list_a = glob.glob("signals/aorta/*.wav")
-    fil_list_a = glob.glob("signals/coronary/*.wav")
+    file_list_a = glob.glob("signals/aorta/*.wav")
+    file_list_a = glob.glob("signals/coronary/*.wav")
 
     # un classification
     simple_clf.run_svm_clf(file_list_a, file_list_b)
