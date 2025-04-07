@@ -79,11 +79,11 @@ def simple_reduced_run(output_folder):
     gene selection, basically there just to make sure this stuff compile on real data"""
 
     # params
-    n_genes = 30
+    n_genes = 50
     audio_duration = 4.0
     n_random_pick = 3
-    J = 3
-    Q = 5
+    J = 2
+    Q = 4
 
     # prepare result folder
     if os.path.exists(output_folder) and os.path.isdir(output_folder):
@@ -125,7 +125,7 @@ def simple_reduced_run(output_folder):
         extract_features.display_features(audio_file, J, Q, f"{output_folder}/signal_samples/{save_file}")        
 
     # un classification
-    simple_clf.run_svm_clf(file_list_a, file_list_b)
+    simple_clf.run_log_clf(file_list_a, file_list_b)
 
 if __name__ == "__main__":
 
