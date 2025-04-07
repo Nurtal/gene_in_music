@@ -9,7 +9,6 @@ import requests
 from itertools import chain
 
 
-
 def build_random_signal(data_file:str, output_folder:str):
     """Build signals from data file, assign random order and random interval to genes
     Create one signal file per patient
@@ -65,6 +64,55 @@ def build_random_signal(data_file:str, output_folder:str):
             output_file.write(f"{x},{y[cmpt]}\n")
             cmpt+=1
         output_file.close()
+
+
+def build_signal_from_computed_positions(data_file:str, output_folder:str, gene_to_pos:dict):
+    """Build signal from pre-computed positions for each genes
+    Create one signal file per patient
+
+    Args:
+        - data_file (str) : path to the data_file
+        - output_folder (str) : path to the output folder
+        - gene_to_pos (dict) : gene to position
+    
+    """
+
+    # laod data
+    df = pd.read_csv(data_file)
+    gene_list = list(gene_to_pos.keys())
+    
+    # Build signal
+    id_to_x = {}
+    id_to_y = {}
+    for index, row in df.iterrows():
+        y = []
+        x = []
+        for gene in gene_list:
+            y.append(row[gene])
+            x.append(gene_to_pos[gene])
+        id_to_y[row['ID']] = y
+        id_to_x[row['ID']] = x
+
+    # craft & save signal
+    if not os.path.isdir(output_folder):
+        os.mkdir(output_folder)
+
+    # loop over patients
+    for i in id_to_y:
+
+        # vars
+        cmpt = 0
+        y = id_to_y[i]
+        x_positions = id_to_x[i]
+
+        # save signal in file
+        output_file = open(f"{output_folder}/{i}_signal.csv", "w")
+        output_file.write("x,y\n")
+        for x in x_positions:
+            output_file.write(f"{x},{y[cmpt]}\n")
+            cmpt+=1
+        output_file.close()
+
 
 
 def ensembl_to_uniprot(ensembl_ids:list) -> dict:
