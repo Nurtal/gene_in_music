@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 
 def get_proximity_from_data(data_file_list:list, matrix_save_file:str) -> None:
@@ -18,12 +19,13 @@ def get_proximity_from_data(data_file_list:list, matrix_save_file:str) -> None:
     corr_matrix = df.corr(method='pearson')  # corrélation entre colonnes
     abs_corr = corr_matrix.abs()
     abs_corr = abs_corr.fillna(0)
+    np.fill_diagonal(abs_corr.values, 1.0)
 
     # save matrix
     abs_corr.to_csv(matrix_save_file)
 
 
-def build_order_from_proximity():
+def build_order_from_proximity(prox_matrix_file):
     """ """
 
 
