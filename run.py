@@ -166,11 +166,11 @@ def simple_binary_run(output_folder:str, preprocess_data:bool, audio_duration:fl
         build_signal.build_signal_from_computed_positions("data/gene_reads_artery_aorta.csv", "signals/aorta", gene_to_pos)
         build_signal.build_signal_from_computed_positions("data/gene_reads_artery_coronary.csv", "signals/coronary", gene_to_pos)
     
-        # turn into audio files
-        for signal_file in glob.glob("signals/aorta/*.csv"):
-            build_signal.turn_signal_into_audio(signal_file, audio_duration)
-        for signal_file in glob.glob("signals/coronary/*.csv"):
-            build_signal.turn_signal_into_audio(signal_file, audio_duration)
+    # turn into audio files
+    for signal_file in glob.glob("signals/aorta/*.csv"):
+        build_signal.turn_signal_into_audio(signal_file, audio_duration)
+    for signal_file in glob.glob("signals/coronary/*.csv"):
+        build_signal.turn_signal_into_audio(signal_file, audio_duration)
 
     # prepare data for classification
     file_list_a = glob.glob("signals/aorta/*.wav")
