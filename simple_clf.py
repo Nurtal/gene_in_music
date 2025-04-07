@@ -46,16 +46,21 @@ def run_svm_clf(file_list_1:list, file_list_2:list):
     
   
 
-def run_log_clf(file_list_1:list, file_list_2:list):
+def run_log_clf(file_list_1:list, file_list_2:list, J:int, Q:int, result_file:str, audio_duration:float) -> None:
     """
     Simple exemple case, extract features from scats and used it to train a logistic regression
+
+    Args:
+        - file_list_1 (list) : list of file for the class a
+        - file_list_2 (list) : list of file for the class b
+        - J (int) : scat features parameters 1
+        - Q (int) : scat features parameters 2
+        - result_save (str) : path to the file for saving results
+        - audio_duration (float) : duration of the audio samples (seconds)
+    
     """
 
-    # params
-    J = 6 
-    Q = 8
-    duration = 16000
-
+    # load data
     X = []
     y = []
     for fl in file_list_1:
@@ -85,6 +90,17 @@ def run_log_clf(file_list_1:list, file_list_2:list):
     y_probs = clf.predict_proba(X_test)[:, 1]
     auc = roc_auc_score(y_test, y_probs)
     print(f"[CLF][LOG-REF] AUC : {auc}")
+
+    # save results
+    output_file = open(result_file, "w")
+    output_file.write("METRIC,VALUE\n")
+    output_file.write("CLF,Logistic-Regression\n")
+    output_file.write("J,{J}\n")
+    output_file.write("Q,{Q}\n")
+    output_file.write("Audio-Duration,{audio_duration}\n")
+    output_file.write("ACC,{accuracy}\n")
+    output_file.write("AUC,{auc}\n")
+    output_file.close()
 
 
 if __name__ == "__main__":
