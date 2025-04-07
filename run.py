@@ -89,6 +89,7 @@ def simple_reduced_run(output_folder):
     if os.path.exists(output_folder) and os.path.isdir(output_folder):
         shutil.rmtree(output_folder)
     os.mkdir(output_folder)
+    os.mkdir(f"{output_folder}/signal_samples")
 
     # generate datasets from gcts
     craft_data.craft_reduce_datasets(["data/gene_reads_artery_aorta.gct", "data/gene_reads_artery_coronary.gct"], n_genes)
@@ -115,13 +116,13 @@ def simple_reduced_run(output_folder):
     random_pick_a = random.sample(file_list_a, n_random_pick)
     for audio_file in random_pick_a:
         save_file = audio_file.split("/")[-1].replace(".wav", "_class_a.png")
-        extract_features.display_features(audio_file, J, Q, f"{output_folder}/{save_file}")        
+        extract_features.display_features(audio_file, J, Q, f"{output_folder}/signal_samples/{save_file}")        
 
     # take a pick at random files from b
     random_pick_b = random.sample(file_list_b, n_random_pick)
     for audio_file in random_pick_b:
         save_file = audio_file.split("/")[-1].replace(".wav", "_class_b.png")
-        extract_features.display_features(audio_file, J, Q, f"{output_folder}/{save_file}")        
+        extract_features.display_features(audio_file, J, Q, f"{output_folder}/signal_samples/{save_file}")        
 
     # un classification
     simple_clf.run_svm_clf(file_list_a, file_list_b)
