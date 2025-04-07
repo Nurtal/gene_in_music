@@ -36,7 +36,7 @@ def extract_features(audio_path:str, J:int, Q:int):
 
     return scattered_features
 
-def display_features(audio_path:str, J:int, Q:int) -> None:
+def display_features(audio_path:str, J:int, Q:int, output_file) -> None:
     """ Display features from audio file
 
     Args:
@@ -56,7 +56,8 @@ def display_features(audio_path:str, J:int, Q:int) -> None:
     plt.xlabel("Temps")
     plt.ylabel("Coefficients Scattering")
     plt.title("Représentation des coefficients du Scattering Transform")
-    plt.show()
+    plt.savefig(output_file)
+    plt.close()
 
 
 
@@ -66,5 +67,5 @@ if __name__ == "__main__":
     audio_path = "signals/42_signal.wav"
     
     # run
-    display_features(audio_path, 3, 5)
+    # display_features(audio_path, 3, 5)
     # x = extract_features(audio_path, 6,8)
