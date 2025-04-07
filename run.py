@@ -65,7 +65,7 @@ def simple_random_run():
 
     # prepare data for classification
     file_list_a = glob.glob("signals/aorta/*.wav")
-    file_list_a = glob.glob("signals/coronary/*.wav")
+    file_list_b = glob.glob("signals/coronary/*.wav")
 
     # run classification
     simple_clf.run_svm_clf(file_list_a, file_list_b)
@@ -98,7 +98,7 @@ def simple_reduced_run():
 
     # prepare data for classification
     file_list_a = glob.glob("signals/aorta/*.wav")
-    file_list_a = glob.glob("signals/coronary/*.wav")
+    file_list_b = glob.glob("signals/coronary/*.wav")
 
     # un classification
     simple_clf.run_svm_clf(file_list_a, file_list_b)
