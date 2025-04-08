@@ -1,0 +1,12 @@
+pytest-shutil
+pandas
+numpy
+scipy
+mygene
+requests
+matplotlib
+tqdm
+librosa
+torch
+kymatio
+scikit-learn

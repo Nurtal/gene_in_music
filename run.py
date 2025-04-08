@@ -125,7 +125,7 @@ def simple_reduced_run(output_folder):
         extract_features.display_features(audio_file, J, Q, f"{output_folder}/signal_samples/{save_file}")        
 
     # un classification
-    simple_clf.run_log_clf(file_list_a, file_list_b)
+    simple_clf.run_log_clf(file_list_a, file_list_b, J, Q, f"{output_folder}/results.csv", audio_duration)
 
 
 
