@@ -79,7 +79,7 @@ def simple_reduced_run(output_folder):
     gene selection, basically there just to make sure this stuff compile on real data"""
 
     # params
-    n_genes = 50
+    n_genes = 100
     audio_duration = 4.0
     n_random_pick = 3
     J = 2
@@ -131,6 +131,8 @@ def simple_reduced_run(output_folder):
 
 def simple_binary_run(output_folder:str, preprocess_data:bool, audio_duration:float, J:int, Q:int, result_file:str):
     """Simple binary classification on tissue dataset, use gene order computed from correlation, used for parameters exploration
+
+    WARNING : too much memory usage
     
     
     Args:
@@ -191,7 +193,79 @@ def simple_binary_run(output_folder:str, preprocess_data:bool, audio_duration:fl
     # un classification
     simple_clf.run_log_clf(file_list_a, file_list_b, J, Q, result_file, audio_duration)
 
+
+
+def simple_binary_gsea_run(output_folder:str, preprocess_data:bool, audio_duration:float, J:int, Q:int, result_file:str):
+    """
+    
+    
+    Args:
+        - output_folder (str) : path to the result folder
+        - preprocess_data (bool) : if set to true, craft datasets and build signals, else, skip this part
+        - audio_duration (float) : duration of the audio samples (seconds)
+        - J (int) : scat features parameters 1
+        - Q (int) : scat features parameters 2
+        - result_save (str) : path to the file for saving results
+    
+    """
+
+    # params
+    n_random_pick = 3
+
+    # prepare result folder
+    if os.path.exists(output_folder) and os.path.isdir(output_folder):
+        shutil.rmtree(output_folder)
+    os.mkdir(output_folder)
+    os.mkdir(f"{output_folder}/signal_samples")
+
+    # run data preprocessing
+    if preprocess_data:
+
+        # generate datasets from gcts
+        craft_data.craft_gsea_dataset(["data/gene_reads_artery_aorta.gct", "data/gene_reads_artery_coronary.gct"], "data/h.all.v2024.1.Hs.entrez.gmt", output_folder)
+
+    #     # compute gene order
+    #     extract_gene_order.get_proximity_from_data(['data/gene_reads_artery_aorta.csv', 'data/gene_reads_artery_coronary.csv'], "data/prox_matrix.csv")
+    #     gene_to_pos = extract_gene_order.build_order_from_proximity("data/prox_matrix.csv")
+    
+    #     # build signal
+    #     build_signal.build_signal_from_computed_positions("data/gene_reads_artery_aorta.csv", "signals/aorta", gene_to_pos)
+    #     build_signal.build_signal_from_computed_positions("data/gene_reads_artery_coronary.csv", "signals/coronary", gene_to_pos)
+    
+    # # turn into audio files
+    # for signal_file in glob.glob("signals/aorta/*.csv"):
+    #     build_signal.turn_signal_into_audio(signal_file, audio_duration)
+    # for signal_file in glob.glob("signals/coronary/*.csv"):
+    #     build_signal.turn_signal_into_audio(signal_file, audio_duration)
+
+    # # prepare data for classification
+    # file_list_a = glob.glob("signals/aorta/*.wav")
+    # file_list_b = glob.glob("signals/coronary/*.wav")
+
+    # # take a pick at random files from a
+    # random_pick_a = random.sample(file_list_a, n_random_pick)
+    # for audio_file in random_pick_a:
+    #     save_file = audio_file.split("/")[-1].replace(".wav", "_class_a.png")
+    #     extract_features.display_features(audio_file, J, Q, f"{output_folder}/signal_samples/{save_file}")        
+
+    # # take a pick at random files from b
+    # random_pick_b = random.sample(file_list_b, n_random_pick)
+    # for audio_file in random_pick_b:
+    #     save_file = audio_file.split("/")[-1].replace(".wav", "_class_b.png")
+    #     extract_features.display_features(audio_file, J, Q, f"{output_folder}/signal_samples/{save_file}")        
+
+    # # un classification
+    # simple_clf.run_log_clf(file_list_a, file_list_b, J, Q, result_file, audio_duration)
+
 if __name__ == "__main__":
 
     # toy_run()
-    simple_reduced_run("/tmp/zog")
+    # simple_reduced_run("/tmp/zog")
+
+    output_folder = "/tmp/zogzogzog"
+    audio_duration = 4.0
+    J = 2
+    Q = 4
+    result_file = "/tmp/zogzog/results.txt"
+    
+    simple_binary_gsea_run(output_folder, True, audio_duration, J, Q, result_file)

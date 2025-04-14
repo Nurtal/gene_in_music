@@ -174,12 +174,13 @@ def craft_gsea_dataset(gct_file_list:list, gmt_file:str, output_folder:str):
             results = mg.querymany(gene_list, scopes='entrezgene', fields='ensembl.gene', species='human')
             ensembl_gene_list = []
             for elt in results:
-                ensembl_result = elt['ensembl']
-                if isinstance(ensembl_result, list):
-                    for ensembl_id in ensembl_result:
-                        ensembl_gene_list.append(ensembl_id['gene'])
-                else:
-                    ensembl_gene_list.append(ensembl_result['gene'])
+                if 'ensembl' in elt:
+                    ensembl_result = elt['ensembl']
+                    if isinstance(ensembl_result, list):
+                        for ensembl_id in ensembl_result:
+                            ensembl_gene_list.append(ensembl_id['gene'])
+                    else:
+                        ensembl_gene_list.append(ensembl_result['gene'])
 
             # select ensembl gene found in data
             ensembl_gene_list_to_keep = ['ID']
