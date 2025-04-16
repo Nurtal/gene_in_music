@@ -130,13 +130,61 @@ def plot_auc(result_folder:str, figure_file:str) -> None:
     plt.close()
 
 
+def extract_config_from_results(result_folder:str) -> dict:
+    """Extract configuration from files in result folders, make sure every file has the same configuration
+    
+    Args:
+        - result_folder (str) : path to the folder containing the results files
 
+    Returns:
+        - (dict) : configuration of the run
+        
+    """
 
+    # init config
+    config = {}
+    j_list = []
+    q_list = []
+    audio_duration_list = []
+    clf_list = []
+    
+    # loop over result files
+    result_files = glob.glob(f"{result_folder}/*.csv")
+    for rf in result_files:
+
+        # get infos from results
+        df = pd.read_csv(rf)
+        j_list.append(list(df[df['METRIC'] == "J"]['VALUE'])[0])
+        q_list.append(list(df[df['METRIC'] == "Q"]['VALUE'])[0])
+        audio_duration_list.append(list(df[df['METRIC'] == "Audio-Duration"]['VALUE'])[0])
+        clf_list.append(list(df[df['METRIC'] == "CLF"]['VALUE'])[0])
+
+    # check that all extracted config are the same
+    if len(list(set(j_list))) == 1:
+        config['J'] = j_list[0]
+    else:
+        config['J'] = 'WARNING : Multiple Values Found'
+    if len(list(set(q_list))) == 1:
+        config['Q'] = q_list[0]
+    else:
+        config['Q'] = 'WARNING : Multiple Values Found'
+    if len(list(set(audio_duration_list))) == 1:
+        config['Audio-Duration'] = audio_duration_list[0]
+    else:
+        config['Audio-Duration'] = 'WARNING : Multiple Values Found'
+    if len(list(set(clf_list))) == 1:
+        config['CLF'] = clf_list[0]
+    else:
+        config['CLF'] = 'WARNING : Multiple Values Found'
+
+    # return config
+    return config        
 
 
 
 if __name__ == "__main__":
 
-    plot_auc("/tmp/zog/results", "/tmp/test.png")
+    # plot_auc("/tmp/zog/results", "/tmp/test.png")
+    machin = extract_config_from_results("/tmp/zog/results")
 
     
