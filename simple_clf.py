@@ -95,11 +95,11 @@ def run_log_clf(file_list_1:list, file_list_2:list, J:int, Q:int, result_file:st
     output_file = open(result_file, "w")
     output_file.write("METRIC,VALUE\n")
     output_file.write("CLF,Logistic-Regression\n")
-    output_file.write("J,{J}\n")
-    output_file.write("Q,{Q}\n")
-    output_file.write("Audio-Duration,{audio_duration}\n")
-    output_file.write("ACC,{accuracy}\n")
-    output_file.write("AUC,{auc}\n")
+    output_file.write(f"J,{J}\n")
+    output_file.write(f"Q,{Q}\n")
+    output_file.write(f"Audio-Duration,{audio_duration}\n")
+    output_file.write(f"ACC,{accuracy}\n")
+    output_file.write(f"AUC,{auc}\n")
     output_file.close()
 
 
