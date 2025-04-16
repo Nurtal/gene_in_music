@@ -1,9 +1,6 @@
 import pandas as pd
 import glob
-
-
-
-
+import matplotlib.pyplot as plt
 
 
 
@@ -73,6 +70,64 @@ def get_geneset_to_auc(result_folder:str) -> dict:
     return geneset_to_acc
     
 
+def plot_acc(result_folder:str, figure_file:str) -> None:
+    """Generate figure of sorted acc from results
+    
+    Args:
+        - result_folder (str) : path to the folder containing the results files
+        - figure_file (str) : path to save figure
+    
+    """
+
+    # get acc
+    geneset_to_acc =get_geneset_to_acc(result_folder)
+    
+    # sort gene sets by acc
+    sorted_items = sorted(geneset_to_acc.items(), key=lambda x: x[1])
+
+    # unpack & clean acc
+    names, accs = zip(*sorted_items)
+    accs = [round(float(f), 5) for f in accs]
+
+    # craft figure
+    plt.figure(figsize=(8, 5))
+    plt.barh(names, accs)
+    plt.xlabel("ACC")
+    plt.ylabel("Gene Set")
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig(figure_file)
+    plt.close()
+
+
+def plot_auc(result_folder:str, figure_file:str) -> None:
+    """Generate figure of sorted auc from results
+    
+    Args:
+        - result_folder (str) : path to the folder containing the results files
+        - figure_file (str) : path to save figure
+    
+    """
+
+    # get acc
+    geneset_to_acc =get_geneset_to_auc(result_folder)
+    
+    # sort gene sets by acc
+    sorted_items = sorted(geneset_to_acc.items(), key=lambda x: x[1])
+
+    # unpack & clean acc
+    names, accs = zip(*sorted_items)
+    accs = [round(float(f), 5) for f in accs]
+
+    # craft figure
+    plt.figure(figsize=(8, 5))
+    plt.barh(names, accs)
+    plt.xlabel("AUC")
+    plt.ylabel("Gene Set")
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig(figure_file)
+    plt.close()
 
 
 
@@ -82,7 +137,6 @@ def get_geneset_to_auc(result_folder:str) -> dict:
 
 if __name__ == "__main__":
 
-    m = get_geneset_to_auc("/tmp/zogzogzog/results")
-    print(m)
+    plot_auc("/tmp/zog/results", "/tmp/test.png")
 
     
