@@ -276,7 +276,7 @@ if __name__ == "__main__":
     # toy_run()
     # simple_reduced_run("/tmp/zog")
 
-    output_folder = "/tmp/zogzogzog"
+    output_folder = "/tmp/zog"
     audio_duration = 4.0
     J = 2
     Q = 4
