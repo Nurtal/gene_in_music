@@ -1,6 +1,7 @@
 import pandas as pd
 import glob
 import matplotlib.pyplot as plt
+import os
 
 
 
@@ -181,10 +182,56 @@ def extract_config_from_results(result_folder:str) -> dict:
     return config        
 
 
+def extract_data_infos(signal_folder:str) -> dict:
+    """Extract infos about data from signal folder
+
+    Args:
+        - signal_folder (str) : path to the folder containing signals (.wav) files
+
+    Returns:
+        - (dict) : extracted informations
+    
+    """
+
+    # init
+    infos = {
+        "n_genes_sets":None,
+        "n_class":None
+    }
+
+    # count gene sets
+    fld_list = []
+    for fld in glob.glob(f"{signal_folder}/*"):
+        if os.path.isdir(fld):
+            fld_list.append(fld)
+    infos['n_genes_sets'] = len(fld_list)
+
+    # get nb class
+    class_folder_list = []
+    if len(fld_list) > 0:
+        for cfld in glob.glob(f"{fld_list[0]}/*"):
+            if os.path.isdir(fld):
+                class_folder_list.append(cfld)
+    infos['n_class'] = len(class_folder_list)
+
+    # get class to n_samples
+    for class_folder in class_folder_list:
+        class_name = class_folder.split("/")[-1]
+        infos[f"n_{class_name}"] = 0
+        for sig_file in glob.glob(f"{class_folder}/*.wav"):
+            infos[f"n_{class_name}"] += 1
+
+    return infos               
+
+        
+    
+
+
 
 if __name__ == "__main__":
 
     # plot_auc("/tmp/zog/results", "/tmp/test.png")
-    machin = extract_config_from_results("/tmp/zog/results")
+    # machin = extract_config_from_results("/tmp/zog/results")
+    extract_data_infos("/tmp/zog/signals")
 
     
