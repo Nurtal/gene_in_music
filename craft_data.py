@@ -2,6 +2,8 @@ import pandas as pd
 from functools import reduce
 import random
 import mygene
+import os
+import shutil
 
 
 def read_gct(filepath:str) -> pd.DataFrame:
@@ -123,8 +125,20 @@ def craft_datasets(gct_file_list:list) -> None:
 
 
 
-def craft_gsea_dataset(gct_file_list:list, gmt_file:str, output_folder:str):
-    """ """
+def craft_gsea_dataset(gct_file_list:list, gmt_file:str, output_folder:str) -> None:
+    """craft gsea datasets, one file for each gene set extracted from gmt_file / for each of the data files in gct_file_list
+    
+    Args:
+        - gct_file_list (list) : list of path for gct files
+        - gmt_file (str) : path to the gmt file containing the gene sets
+        - output_folder (str) : path to the folder use to save generated datasets
+    
+    """
+
+    # prepare result folder
+    if os.path.exists(output_folder) and os.path.isdir(output_folder):
+        shutil.rmtree(output_folder)
+    os.mkdir(output_folder)
 
     # look for genes in data
     gene_list_list = []
@@ -133,7 +147,7 @@ def craft_gsea_dataset(gct_file_list:list, gmt_file:str, output_folder:str):
         gene_list_list.append(list(df['Name']))
 
     # compute intersection
-    gene_list = list(reduce(lambda a, b: set(a) & set(b), gene_list_list))
+    gene_intersection_list = list(reduce(lambda a, b: set(a) & set(b), gene_list_list))
 
     # get gene set to gene list
     gene_sets = {}
@@ -154,7 +168,7 @@ def craft_gsea_dataset(gct_file_list:list, gmt_file:str, output_folder:str):
         df = read_gct(gct_file)
 
         # reformat
-        df = df[df['Name'].isin(gene_list)]
+        df = df[df['Name'].isin(gene_intersection_list)]
         df = df.drop(columns=['Description'])
         df = df.rename(columns={'Name':'ID'})
         df = df.set_index('ID')
@@ -168,7 +182,6 @@ def craft_gsea_dataset(gct_file_list:list, gmt_file:str, output_folder:str):
         # split to gene set
         for gene_set in gene_sets:
             gene_list = gene_sets[gene_set]
-
 
             # convert entrez gene from gmt data to ensembl gene to match gct files
             results = mg.querymany(gene_list, scopes='entrezgene', fields='ensembl.gene', species='human')
@@ -189,9 +202,10 @@ def craft_gsea_dataset(gct_file_list:list, gmt_file:str, output_folder:str):
                     ensembl_gene_list_to_keep.append(ensembl_gene)
 
             # create subset
-            data_file_name = gct_file.split("/")[-1].replace(".gct", f"_{gene_set}.csv")
-            df = df[ensembl_gene_list_to_keep]
-            df.to_csv(f"{output_folder}/{data_file_name}")
+            if len(ensembl_gene_list_to_keep) > 1:
+                data_file_name = gct_file.split("/")[-1].replace(".gct", f"_{gene_set}.csv")
+                df_spe = df[ensembl_gene_list_to_keep]
+                df_spe.to_csv(f"{output_folder}/{data_file_name}", index=False)
 
 
       
