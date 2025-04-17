@@ -2,6 +2,8 @@ import pandas as pd
 import glob
 import matplotlib.pyplot as plt
 import os
+import pypandoc
+import shutil
 
 
 
@@ -223,7 +225,38 @@ def extract_data_infos(signal_folder:str) -> dict:
 
     return infos               
 
-        
+
+def craft_run_report(run_folder:str):
+    """ """
+
+
+    # prepare folders for report generation
+    if os.path.exists(f"{run_folder}/report") and os.path.isdir(f"{run_folder}/report"):
+        shutil.rmtree(f"{run_folder}/report")
+    os.mkdir(f"{run_folder}/report")
+
+    # extract informations
+    gene_set_to_acc = get_geneset_to_acc(f"{run_folder}/results") 
+    gene_set_to_auc = get_geneset_to_acc(f"{run_folder}/results") 
+    infos = extract_config_from_results(f"{run_folder}/signals")    
+
+    # generate markdown report
+    md_report = open(f"{run_folder}/report/report.md", "w")
+    md_report.write("# Run Report\n")
+    md_report.write("## Data\n")
+    md_report.write("## Clf Perfs\n")
+    md_report.close()
+
+    # convert md to pdf
+    pypandoc.convert_file(
+        f"{run_folder}/report/report.md",
+        to='pdf',
+        outputfile=f"{run_folder}/report/report.pdf",
+        extra_args=[
+        '--from=markdown',       # Spécifie que l'entrée est du Markdown
+        '--pdf-engine=xelatex'   # Utilise xelatex comme moteur LaTeX (plus flexible que pdflatex)
+    ]
+    )
     
 
 
@@ -232,6 +265,7 @@ if __name__ == "__main__":
 
     # plot_auc("/tmp/zog/results", "/tmp/test.png")
     # machin = extract_config_from_results("/tmp/zog/results")
-    extract_data_infos("/tmp/zog/signals")
+    # extract_data_infos("/tmp/zog/signals")
+    craft_run_report("/tmp/zog")
 
     
