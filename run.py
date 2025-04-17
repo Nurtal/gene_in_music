@@ -11,6 +11,7 @@ import simple_clf
 import craft_data
 import extract_gene_order
 import extract_features
+import craft_report
 
 def toy_run():
     """ """
@@ -280,6 +281,10 @@ def simple_binary_gsea_run(output_folder:str, preprocess_data:bool, audio_durati
             # un classification - umap
             result_file = f"{output_folder}/results_umap/{gene_set}_log_clf.csv"
             simple_clf.run_umap_log_clf(data_file, associated_data_file, result_file)
+
+    # craft report
+    craft_report.craft_run_report(output_folder)
+        
 
 if __name__ == "__main__":
 

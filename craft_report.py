@@ -252,6 +252,7 @@ def craft_run_report(run_folder:str) -> None:
     umap_gene_set_to_acc = get_geneset_to_acc(f"{run_folder}/results_umap") 
     umap_gene_set_to_auc = get_geneset_to_auc(f"{run_folder}/results_umap")
     infos = extract_data_infos(f"{run_folder}/signals")    
+    config = extract_config_from_results(f"{run_folder}/results")
 
     # generate markdown report
     md_report = open(f"{run_folder}/report/report.md", "w")
@@ -262,10 +263,19 @@ def craft_run_report(run_folder:str) -> None:
     for k in infos:
         if k not in ['n_genes_sets', 'n_class']:
             md_report.write(f"- {k} : {infos[k]} samples \n")
+
+    # write config
+    md_report.write("\n")
+    md_report.write("## Configuration\n")
+    md_report.write(f"- J : {config['J']}\n")
+    md_report.write(f"- Q : {config['Q']}\n")
+    md_report.write(f"- Audio-Duration : {config['Audio-Duration']}\n")
             
+    # write performances
+    md_report.write("\n")
     for gene_set in list(scat_gene_set_to_acc.keys()):
-        md_report.write(f"### {gene_set}\n")
-        md_report.write(f"#### Perfs\n\n")
+        md_report.write(f"## {gene_set}\n")
+        md_report.write(f"### Perfs\n\n")
 
         # extract metrics
         scat_acc = scat_gene_set_to_acc[gene_set]
@@ -288,7 +298,8 @@ def craft_run_report(run_folder:str) -> None:
             interesting_sets.append(gene_set)
 
     # display interesting_sets
-    md_report.write("### Set to investigate\n")
+    md_report.write("\n")
+    md_report.write("## Set to investigate\n")
     for gene_set in interesting_sets:
         md_report.write(f"- {gene_set}\n")
         
