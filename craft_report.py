@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import os
 import pypandoc
 import shutil
+import markdown
+from weasyprint import HTML
 
 
 
@@ -226,9 +228,16 @@ def extract_data_infos(signal_folder:str) -> dict:
     return infos               
 
 
-def craft_run_report(run_folder:str):
-    """ """
+def craft_run_report(run_folder:str) -> None:
+    """Craft a markdown report and turn into a pdf file (ugly, for now)
 
+    Args:
+        - run_folder (str) : path to the run folder, should contains results subflder
+    
+    """
+
+    # init
+    interesting_sets = []
 
     # prepare folders for report generation
     if os.path.exists(f"{run_folder}/report") and os.path.isdir(f"{run_folder}/report"):
@@ -236,27 +245,64 @@ def craft_run_report(run_folder:str):
     os.mkdir(f"{run_folder}/report")
 
     # extract informations
-    gene_set_to_acc = get_geneset_to_acc(f"{run_folder}/results") 
-    gene_set_to_auc = get_geneset_to_acc(f"{run_folder}/results") 
-    infos = extract_config_from_results(f"{run_folder}/signals")    
+    scat_gene_set_to_acc = get_geneset_to_acc(f"{run_folder}/results") 
+    scat_gene_set_to_auc = get_geneset_to_auc(f"{run_folder}/results") 
+    direct_gene_set_to_acc = get_geneset_to_acc(f"{run_folder}/results_direct") 
+    direct_gene_set_to_auc = get_geneset_to_auc(f"{run_folder}/results_direct") 
+    umap_gene_set_to_acc = get_geneset_to_acc(f"{run_folder}/results_umap") 
+    umap_gene_set_to_auc = get_geneset_to_auc(f"{run_folder}/results_umap")
+    infos = extract_data_infos(f"{run_folder}/signals")    
 
     # generate markdown report
     md_report = open(f"{run_folder}/report/report.md", "w")
     md_report.write("# Run Report\n")
     md_report.write("## Data\n")
-    md_report.write("## Clf Perfs\n")
+    md_report.write(f"- {infos['n_genes_sets']} analyzed pathways\n")
+    md_report.write(f"- {infos['n_class']} targets\n")
+    for k in infos:
+        if k not in ['n_genes_sets', 'n_class']:
+            md_report.write(f"- {k} : {infos[k]} samples \n")
+            
+    for gene_set in list(scat_gene_set_to_acc.keys()):
+        md_report.write(f"### {gene_set}\n")
+        md_report.write(f"#### Perfs\n\n")
+
+        # extract metrics
+        scat_acc = scat_gene_set_to_acc[gene_set]
+        scat_auc = scat_gene_set_to_auc[gene_set]
+        umap_acc = umap_gene_set_to_acc[gene_set]
+        umap_auc = umap_gene_set_to_auc[gene_set]
+        direct_acc = direct_gene_set_to_acc[gene_set]
+        direct_auc = direct_gene_set_to_auc[gene_set]
+
+        # craft result table
+        md_report.write("| METRICS | GIM | Direct | UMAP |\n")
+        md_report.write("|---------|-----|--------|------|\n")
+        md_report.write(f"| ACC | {scat_acc} | {direct_acc} | {umap_acc} |\n")
+        md_report.write(f"| AUC | {scat_auc} | {direct_auc} | {umap_auc} |\n\n")
+
+        # spot interesting configuration
+        if (scat_acc > umap_acc) and (scat_acc > direct_acc) and gene_set not in interesting_sets:
+            interesting_sets.append(gene_set)
+        if (scat_auc > umap_auc) and (scat_auc > direct_auc) and gene_set not in interesting_sets:
+            interesting_sets.append(gene_set)
+
+    # display interesting_sets
+    md_report.write("### Set to investigate\n")
+    for gene_set in interesting_sets:
+        md_report.write(f"- {gene_set}\n")
+        
+    # close report
     md_report.close()
 
-    # convert md to pdf
-    pypandoc.convert_file(
-        f"{run_folder}/report/report.md",
-        to='pdf',
-        outputfile=f"{run_folder}/report/report.pdf",
-        extra_args=[
-        '--from=markdown',       # Spécifie que l'entrée est du Markdown
-        '--pdf-engine=xelatex'   # Utilise xelatex comme moteur LaTeX (plus flexible que pdflatex)
-    ]
-    )
+    # convert Markdown to HTML
+    with open(f"{run_folder}/report/report.md", "r", encoding='utf-8') as f:
+        md_text = f.read()
+    html_text = markdown.markdown(md_text)
+
+    # convert html to pdf
+    HTML(string=html_text).write_pdf(f"{run_folder}/report/report.pdf")
+
     
 
 
@@ -266,6 +312,6 @@ if __name__ == "__main__":
     # plot_auc("/tmp/zog/results", "/tmp/test.png")
     # machin = extract_config_from_results("/tmp/zog/results")
     # extract_data_infos("/tmp/zog/signals")
-    craft_run_report("/tmp/zog")
+    craft_run_report("/tmp/zogzog")
 
     

@@ -218,6 +218,8 @@ def simple_binary_gsea_run(output_folder:str, preprocess_data:bool, audio_durati
     os.mkdir(f"{output_folder}/data")
     os.mkdir(f"{output_folder}/signals")
     os.mkdir(f"{output_folder}/results")
+    os.mkdir(f"{output_folder}/results_direct")
+    os.mkdir(f"{output_folder}/results_umap")
 
     # run data preprocessing
     if preprocess_data:
@@ -271,12 +273,20 @@ def simple_binary_gsea_run(output_folder:str, preprocess_data:bool, audio_durati
             result_file = f"{output_folder}/results/{gene_set}_log_clf.csv"
             simple_clf.run_log_clf(file_list_a, file_list_b, J, Q, result_file, audio_duration)
 
+            # un classification - direct
+            result_file = f"{output_folder}/results_direct/{gene_set}_log_clf.csv"
+            simple_clf.run_direct_log_clf(data_file, associated_data_file, result_file)
+
+            # un classification - umap
+            result_file = f"{output_folder}/results_umap/{gene_set}_log_clf.csv"
+            simple_clf.run_umap_log_clf(data_file, associated_data_file, result_file)
+
 if __name__ == "__main__":
 
     # toy_run()
     # simple_reduced_run("/tmp/zog")
 
-    output_folder = "/tmp/zog"
+    output_folder = "/tmp/zogzog"
     audio_duration = 4.0
     J = 2
     Q = 4
