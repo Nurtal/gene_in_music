@@ -217,7 +217,6 @@ def craft_gsea_dataset(gct_file_list:list, gmt_file:str, output_folder:str) -> N
             gene_list = gene_sets[gene_set]
 
             # convert entrez gene from gmt data to ensembl gene to match gct files
-            print(gene_list)
             ensembl_gene_list = entrez_to_ensembl(gene_list) 
                         
             # select ensembl gene found in data
