@@ -21,13 +21,14 @@ def entrez_to_ensembl(entrez_gene_list:list) -> list:
     # param
     data_file = "data/mart_export2.txt"
     df = pd.read_csv(data_file).dropna()
+    df['NCBI gene (formerly Entrezgene) ID'] = df['NCBI gene (formerly Entrezgene) ID'].astype(int).astype(str)
 
     # get gene to scan
     to_scan = []
     for g in entrez_gene_list:
-        if g in list(df['EntrezGene transcript name ID']) and g not in to_scan:
+        if g in list(df['NCBI gene (formerly Entrezgene) ID']) and g not in to_scan:
             to_scan.append(g)
-    df = df[df['EntrezGene transcript name ID'].isin(to_scan)]
+    df = df[df['NCBI gene (formerly Entrezgene) ID'].isin(to_scan)]
 
     # get ensembl genes
     ensembl_gene_list = list(df['Gene stable ID'])
@@ -216,6 +217,7 @@ def craft_gsea_dataset(gct_file_list:list, gmt_file:str, output_folder:str) -> N
             gene_list = gene_sets[gene_set]
 
             # convert entrez gene from gmt data to ensembl gene to match gct files
+            print(gene_list)
             ensembl_gene_list = entrez_to_ensembl(gene_list) 
                         
             # select ensembl gene found in data
