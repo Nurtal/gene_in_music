@@ -240,4 +240,4 @@ if __name__ == "__main__":
     # craft_datasets(["data/gene_reads_artery_aorta.gct", "data/gene_reads_artery_coronary.gct"])
     # craft_gsea_dataset(["data/gene_reads_artery_aorta.gct", "data/gene_reads_artery_coronary.gct"], "data/h.all.v2024.1.Hs.entrez.gmt", "/tmp/zog")
 
-    # entrez_to_ensembl(['AGAP12P-203', 'OR4C45-202'])
+    entrez_to_ensembl(['AGAP12P-203', 'OR4C45-202'])
