@@ -6,6 +6,38 @@ import os
 import shutil
 
 
+def entrez_to_ensembl(entrez_gene_list:list) -> list:
+    """Use a manually downloaded ressource file to convert a list of entre gene into a list
+    of ensembl gene
+
+    Args:
+        - entrez_gene_list (list) : list of entrez gene
+
+    Returns:
+        - (list) : list of ensembl genes
+    
+    """
+    
+    # param
+    data_file = "data/mart_export2.txt"
+    df = pd.read_csv(data_file).dropna()
+
+    # get gene to scan
+    to_scan = []
+    for g in entrez_gene_list:
+        if g in list(df['EntrezGene transcript name ID']) and g not in to_scan:
+            to_scan.append(g)
+    df = df[df['EntrezGene transcript name ID'].isin(to_scan)]
+
+    # get ensembl genes
+    ensembl_gene_list = list(df['Gene stable ID'])
+
+    return ensembl_gene_list
+
+    
+            
+
+
 def read_gct(filepath:str) -> pd.DataFrame:
     """Load content of a gct file into dataframe and return it
 
@@ -215,4 +247,6 @@ if __name__ == "__main__":
 
     # craft_reduce_datasets(["data/gene_reads_artery_aorta.gct", "data/gene_reads_artery_coronary.gct"], 5)
     # craft_datasets(["data/gene_reads_artery_aorta.gct", "data/gene_reads_artery_coronary.gct"])
-    craft_gsea_dataset(["data/gene_reads_artery_aorta.gct", "data/gene_reads_artery_coronary.gct"], "data/h.all.v2024.1.Hs.entrez.gmt", "/tmp/zog")
+    # craft_gsea_dataset(["data/gene_reads_artery_aorta.gct", "data/gene_reads_artery_coronary.gct"], "data/h.all.v2024.1.Hs.entrez.gmt", "/tmp/zog")
+
+    entrez_to_ensembl(['AGAP12P-203', 'OR4C45-202'])
