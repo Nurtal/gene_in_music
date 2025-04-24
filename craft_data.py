@@ -216,17 +216,8 @@ def craft_gsea_dataset(gct_file_list:list, gmt_file:str, output_folder:str) -> N
             gene_list = gene_sets[gene_set]
 
             # convert entrez gene from gmt data to ensembl gene to match gct files
-            results = mg.querymany(gene_list, scopes='entrezgene', fields='ensembl.gene', species='human')
-            ensembl_gene_list = []
-            for elt in results:
-                if 'ensembl' in elt:
-                    ensembl_result = elt['ensembl']
-                    if isinstance(ensembl_result, list):
-                        for ensembl_id in ensembl_result:
-                            ensembl_gene_list.append(ensembl_id['gene'])
-                    else:
-                        ensembl_gene_list.append(ensembl_result['gene'])
-
+            ensembl_gene_list = entrez_to_ensembl(gene_list) 
+                        
             # select ensembl gene found in data
             ensembl_gene_list_to_keep = ['ID']
             for ensembl_gene in ensembl_gene_list:
@@ -249,4 +240,4 @@ if __name__ == "__main__":
     # craft_datasets(["data/gene_reads_artery_aorta.gct", "data/gene_reads_artery_coronary.gct"])
     # craft_gsea_dataset(["data/gene_reads_artery_aorta.gct", "data/gene_reads_artery_coronary.gct"], "data/h.all.v2024.1.Hs.entrez.gmt", "/tmp/zog")
 
-    entrez_to_ensembl(['AGAP12P-203', 'OR4C45-202'])
+    # entrez_to_ensembl(['AGAP12P-203', 'OR4C45-202'])
