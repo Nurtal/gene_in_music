@@ -315,7 +315,25 @@ def craft_run_report(run_folder:str) -> None:
     HTML(string=html_text).write_pdf(f"{run_folder}/report/report.pdf")
 
     
+def craft_exploration_report(exploration_folder:str):
+    """IN PROGRESS"""
 
+    # get list of markdown files present in exploration folder
+    run_file_list = glob.glob(f"{exploration_folder}/*.md")
+
+    # extract run to config
+    run_to_config = {}
+    for run_file in run_file_list:
+
+        # read file
+        run_data = open(run_file, "r")
+        for line in run_data:
+            print(line.rstrip())
+
+        run_data.close()
+        print("-"*45)
+
+    
 
 
 if __name__ == "__main__":
@@ -323,6 +341,7 @@ if __name__ == "__main__":
     # plot_auc("/tmp/zog/results", "/tmp/test.png")
     # machin = extract_config_from_results("/tmp/zog/results")
     # extract_data_infos("/tmp/zog/signals")
-    craft_run_report("/tmp/zogzog")
+    # craft_run_report("/tmp/zogzog")
+    craft_exploration_report("exploration")
 
     
