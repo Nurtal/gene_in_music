@@ -316,7 +316,7 @@ def craft_run_report(run_folder:str) -> None:
     HTML(string=html_text).write_pdf(f"{run_folder}/report/report.pdf")
 
     
-def craft_exploration_report(exploration_folder:str, output_file):
+def craft_exploration_report(exploration_folder:str):
     """IN PROGRESS"""
 
     # get list of markdown files present in exploration folder
@@ -330,16 +330,10 @@ def craft_exploration_report(exploration_folder:str, output_file):
 
         # get run ID
         run_id = run_file.split("/")[-1].split("_")[-1].replace(".md", "")
-        run_to_interesting_pathways[run_id] = []
-        run_to_config[run_id] = {
-            "J":"NA",
-            "Q":"NA",
-            "Audio-Duration":"NA"
-        }
+        print(run_id)
 
         # read file
         run_data = open(run_file, "r")
-        recording_pathways = False
         for line in run_data:
 
             # spot pathways
@@ -352,74 +346,17 @@ def craft_exploration_report(exploration_folder:str, output_file):
             # spot config
             if re.search('^- J : ', line):
                 j_value = line.rstrip().split(" : ")[1]
-                run_to_config[run_id]["J"] = j_value
             if re.search('^- Q : ', line):
                 q_value = line.rstrip().split(" : ")[1]
-                run_to_config[run_id]["Q"] = q_value
             if re.search('^- Audio-Duration : ', line):
                 audio_duration_value = line.rstrip().split(" : ")[1]
-                run_to_config[run_id]["Audio-Duration"] = audio_duration_value
 
-            # spot interesting pathways
-            if re.search("^## Set to investigate", line):
-                recording_pathways = True
-
-            if recording_pathways:
-                if not re.search('^##', line):
-                    pathway = line.rstrip().replace("- ", "")
-                    if pathway not in run_to_interesting_pathways[run_id]:
-                        run_to_interesting_pathways[run_id].append(pathway)
 
         run_data.close()
+        print("-"*45)
 
-    # create meta report
-    report_data = open(output_file, "w")
 
-    # write header
-    report_data.write("# Exploration Report\n\n")
-
-    # compute and save config ranking
-    report_data.write("## Sorted config\n\n")
-    run_to_perf = {}
-    for run in run_to_interesting_pathways:
-        run_to_perf[run] = len(run_to_interesting_pathways[run])
-    run_to_perf = {k: v for k, v in sorted(run_to_perf.items(), key=lambda item: item[1], reverse=True)}
-    classement = 1
-    last_score = "NA"
-    for run in run_to_perf:
-        config = run_to_config[run]
-        score = run_to_perf[run]
-        if last_score != 'NA' and last_score != score:
-            report_data.write("-"*65+"\n")
-        report_data.write(f"- {classement}) RUN : {run} | SCORE : {score} | J = {config['J']} | Q = {config['Q']} | Audio-Duration = {config['Audio-Duration']}\n")
-        last_score = score
-        classement+=1
-
-    # compute and save pathways ranking
-    report_data.write("## Sorted pathways\n\n")
-    pathway_to_support = {}
-    for pathway in pathway_list:
-        pathway_to_support[pathway] = 0
-    for run in run_to_interesting_pathways:
-        for pathway in run_to_interesting_pathways[run]:
-            pathway_to_support[pathway] +=1
-    pathway_to_support = {k: v for k, v in sorted(pathway_to_support.items(), key=lambda item: item[1], reverse=True)}
-
-    last_support = "NA"
-    classement = 1
-    for pathway in pathway_to_support:
-        support = pathway_to_support[pathway]
-        if last_support != 'NA' and last_support != support:
-            report_data.write("-"*25+"\n")
-        report_data.write(f"- {classement}) {pathway} ({support})\n")
-        last_support = support
-        classement+=1
-    
-    report_data.close()
-
-    # print(pathway_list)
-    # print(run_to_config)
-    # print(run_to_interesting_pathways)
+    print(pathway_list)
 
     
 
@@ -430,6 +367,6 @@ if __name__ == "__main__":
     # machin = extract_config_from_results("/tmp/zog/results")
     # extract_data_infos("/tmp/zog/signals")
     # craft_run_report("/tmp/zogzog")
-    craft_exploration_report("exploration_save", "/tmp/zog.md")
+    craft_exploration_report("/tmp/explo")
 
     

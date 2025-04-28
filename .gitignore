@@ -3,5 +3,6 @@ __pycache__/*
 data/*
 signals/*
 exploration/*
+exploration_save/*
 *.tmp
 *.log
