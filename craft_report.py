@@ -316,8 +316,14 @@ def craft_run_report(run_folder:str) -> None:
     HTML(string=html_text).write_pdf(f"{run_folder}/report/report.pdf")
 
     
-def craft_exploration_report(exploration_folder:str, output_file):
-    """IN PROGRESS"""
+def craft_exploration_report(exploration_folder:str, output_file:str) -> None:
+    """Craft a meta report (md format) from the md files stored in the exploration folder
+
+    Args:
+        - exploration_folder (str) : path to the exploration folder
+        - output_file (str) : path to the report file to be generated (md format)
+    
+    """
 
     # get list of markdown files present in exploration folder
     run_file_list = glob.glob(f"{exploration_folder}/*.md")
@@ -396,7 +402,7 @@ def craft_exploration_report(exploration_folder:str, output_file):
         classement+=1
 
     # compute and save pathways ranking
-    report_data.write("## Sorted pathways\n\n")
+    report_data.write("\n\n## Sorted pathways\n\n")
     pathway_to_support = {}
     for pathway in pathway_list:
         pathway_to_support[pathway] = 0
@@ -415,12 +421,8 @@ def craft_exploration_report(exploration_folder:str, output_file):
         last_support = support
         classement+=1
     
+    # close report
     report_data.close()
-
-    # print(pathway_list)
-    # print(run_to_config)
-    # print(run_to_interesting_pathways)
-
     
 
 
