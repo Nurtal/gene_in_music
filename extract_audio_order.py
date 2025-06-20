@@ -1,5 +1,6 @@
 from pydub import AudioSegment
 import glob
+import os
 
 
 def concatenate_audio_file(audio_file_list:list, audio_file_output:str) -> None:
@@ -84,11 +85,47 @@ def get_pathway_list(signals_folder:str) -> list:
 
 
 
+def assemble_audio_signals(ordered_pathway_list:list, signals_folder:str, output_folder:str) -> None:
+    """assemble big audio file in the order defined by ordered_pathway_list from signals_folder
+
+    Args:
+        orderd_pathway_list (list) : list of pathways (order of concatenation to follow)
+        signals_folder (str) : path to signal folder
+        output_folder (str) : path to to the output folder
+        
+    """
+
+    # init output folder if not exist
+    if not os.path.isdir(output_folder):
+        os.mkdir(f"{output_folder}")
+    
+    # get manifest
+    class_to_id = extract_manifest(signals_folder)
+
+    # run concatenation
+    for c in class_to_id:
+        os.mkdir(f"{output_folder}/{c}")
+        
+        for i in class_to_id[c]:
+            audio_file_list = []
+            for p in ordered_pathway_list:
+                audio_file = f"{signals_folder}/{p}/{c}/{i}_signal.wav"
+                audio_file_list.append(audio_file)
+
+            output_file = f"{output_folder}/{c}/{i}_signal.wav"
+            concatenate_audio_file(audio_file_list, output_file)
+            
+                
+            
+
+
+
 if __name__ == "__main__":
 
     audio_file_list = ['signals/aorta/GTEX-1HSMP-0826-SM-A9SKW_signal.wav', 'signals/aorta/GTEX-ZF3C-1426-SM-4WWCD_signal.wav']
 
     # concatenate_audio_file(audio_file_list, "/tmp/zog.wav")
-    m = get_pathway_list("data/signals_small")
-    print(m)
+    # m = get_pathway_list("data/signals_small")
+
+    assemble_audio_signals(['HALLMARK_ANGIOGENESIS', 'HALLMARK_INFLAMMATORY_RESPONSE', 'HALLMARK_KRAS_SIGNALING_DN'], 'data/signals_small', "/tmp/zog2")
     
