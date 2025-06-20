@@ -432,6 +432,6 @@ if __name__ == "__main__":
     # machin = extract_config_from_results("/tmp/zog/results")
     # extract_data_infos("/tmp/zog/signals")
     # craft_run_report("/tmp/zogzog")
-    craft_exploration_report("exploration_save", "/tmp/zog.md")
+    craft_exploration_report("exploration", "/tmp/zog.md")
 
     

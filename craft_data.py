@@ -19,7 +19,7 @@ def entrez_to_ensembl(entrez_gene_list:list) -> list:
     """
 
     # param
-    data_file = "data/mart_export2.txt"
+    data_file = "data/mart_export.txt"
 
     # load data
     df = pd.read_csv(data_file)

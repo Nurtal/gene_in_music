@@ -292,8 +292,8 @@ if __name__ == "__main__":
     # simple_reduced_run("/tmp/zog")
 
     output_folder = "/tmp/zogzog"
-    audio_duration = 4.0
+    audio_duration = 10.0
     J = 2
-    Q = 4
+    Q = 7
     
     simple_binary_gsea_run(output_folder, True, audio_duration, J, Q)

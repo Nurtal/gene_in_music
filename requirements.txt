@@ -12,3 +12,5 @@ kymatio
 scikit-learn
 pypandoc
 umap-learn
+markdown
+weasyprint
