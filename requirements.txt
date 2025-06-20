@@ -14,3 +14,4 @@ pypandoc
 umap-learn
 markdown
 weasyprint
+pydub

@@ -60,13 +60,35 @@ def extract_manifest(signals_folder:str) -> dict:
 
     return class_to_file_to_keep
 
+
+def get_pathway_list(signals_folder:str) -> list:
+    """Get pathways list from the signals_folder
+
+    Args:
+        signals_folder (str) : path to the signal folder
+
+    Returns
+        (list) : list of pathways available in signal folder
     
+    """
+
+    # screen signals folder
+    pathway_list = []
+    for pathway_folder in glob.glob(f"{signals_folder}/*"):
+        pathway_name = pathway_folder.split("/")[-1]
+        if pathway_name not in pathway_list:
+            pathway_list.append(pathway_name)
+
+    # return list of extracted pathways
+    return pathway_list
+
+
 
 if __name__ == "__main__":
 
     audio_file_list = ['signals/aorta/GTEX-1HSMP-0826-SM-A9SKW_signal.wav', 'signals/aorta/GTEX-ZF3C-1426-SM-4WWCD_signal.wav']
 
     # concatenate_audio_file(audio_file_list, "/tmp/zog.wav")
-    m = extract_manifest("data/signals_small")
+    m = get_pathway_list("data/signals_small")
     print(m)
     
