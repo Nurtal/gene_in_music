@@ -229,7 +229,7 @@ def simple_binary_gsea_run(output_folder:str, preprocess_data:bool, audio_durati
         craft_data.craft_gsea_dataset(["data/gene_reads_artery_aorta.gct", "data/gene_reads_artery_coronary.gct"], "data/h.all.v2024.1.Hs.entrez.gmt", f"{output_folder}/data")
 
         # loop over generated gsea file
-        for data_file in glob.glob(f"{output_folder}/data/gene_reads_artery_aorta*.csv"):
+        for data_file in glob.glob(f"{output_folder}/data/gene_reads_artery_aorta*.csv")[5:6]: # TODO LOOP ON ALL LIST
 
             # extract gene set name & prepare output dirs
             gene_set = data_file.split("/")[-1].replace("gene_reads_artery_aorta_", "").replace(".csv", "")

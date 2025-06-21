@@ -229,6 +229,12 @@ def run_umap_log_clf(data_file_a:str, data_file_b:str, result_file:str) -> None:
     output_file.write(f"AUC,{auc}\n")
     output_file.close()
 
+
+
+def run_log_binary_clf_on_audio():
+    """ """
+
+
 if __name__ == "__main__":
 
 

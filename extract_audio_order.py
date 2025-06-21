@@ -1,6 +1,7 @@
 from pydub import AudioSegment
 import glob
 import os
+import simple_clf
 
 
 def concatenate_audio_file(audio_file_list:list, audio_file_output:str) -> None:
@@ -117,8 +118,15 @@ def assemble_audio_signals(ordered_pathway_list:list, signals_folder:str, output
             
                 
             
+def run_clf():
+    """for dev purpose"""
 
-
+    file_list_1 = glob.glob("/tmp/zog/aorta/*.wav")
+    file_list_2 = glob.glob("/tmp/zog/coronary/*.wav")
+    J = 2
+    Q = 7
+    simple_clf.run_log_clf(file_list_1, file_list_2, J, Q, "/tmp/zog_result.txt", 30)
+    
 
 if __name__ == "__main__":
 
@@ -126,6 +134,7 @@ if __name__ == "__main__":
 
     # concatenate_audio_file(audio_file_list, "/tmp/zog.wav")
     # m = get_pathway_list("data/signals_small")
-
-    assemble_audio_signals(['HALLMARK_ANGIOGENESIS', 'HALLMARK_INFLAMMATORY_RESPONSE', 'HALLMARK_KRAS_SIGNALING_DN'], 'data/signals_small', "/tmp/zog2")
+    pathway_order = ['HALLMARK_FATTY_ACID_METABOLISM', 'HALLMARK_G2M_CHECKPOINT', 'HALLMARK_TNFA_SIGNALING_VIA_NFKB']
+    # assemble_audio_signals(pathway_order, 'data/signals_small', "/tmp/zog")
+    run_clf()
     
