@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 from sklearn.manifold import MDS
+import mygene
+import craft_data
 
 
 def get_proximity_from_data(data_file_list:list, matrix_save_file:str) -> None:
@@ -57,8 +59,61 @@ def build_order_from_proximity(prox_matrix_file:str) -> dict:
     return gene_to_position
 
 
+def reorder_cols_from_gmt(data_file, gmt_file, output_file):
+    """Use a gmt file to reorder cols to, supposed to work, need to test it sometimes, whatever"""
+
+    # load data & extract genes
+    df = pd.read_csv(data_file)
+    present_gene_list = []
+    for v in list(df.keys()):
+        if v not in ['ID', 'LABEL'] and v not in present_gene_list:
+            present_gene_list.append(v)
+
+    # get gene set to gene list
+    gene_sets = {}
+    with open(gmt_file, "r") as f:
+        for line in f:
+            parts = line.strip().split("\t")
+            name = parts[0]
+            genes = parts[2:]  # on ignore la description
+            gene_sets[name] = genes
+
+    
+    # build gene order
+    gene_order = []
+    mg = mygene.MyGeneInfo()
+    for gene_set in gene_sets:
+        gene_list = gene_sets[gene_set]
+        ensembl_gene_list = craft_data.entrez_to_ensembl(gene_list) 
+        for g in ensembl_gene_list:
+            if g in present_gene_list and g not in gene_order:
+                gene_order.append(g)
+
+    # add gene that has not been spoted as part of a pathway
+    for g in present_gene_list:
+        if g not in gene_order:
+            gene_order.append(g)
+
+    # reorder cols
+    col_order = ['ID']
+    for g in gene_order:
+        col_order.append(g)
+    col_order.append('LABEL')
+    df = df[col_order]
+    df.to_csv(output_file, index=False)
+
+        
+
+    
+
+
+
+
 if __name__ == "__main__":
 
-    get_proximity_from_data(['data/gene_reads_artery_aorta.csv', 'data/gene_reads_artery_coronary.csv'], "data/prox_matrix.csv")
-    build_order_from_proximity("data/prox_matrix.csv")
+    # get_proximity_from_data(['data/gene_reads_artery_aorta.csv', 'data/gene_reads_artery_coronary.csv'], "data/prox_matrix.csv")
+    # build_order_from_proximity("data/prox_matrix.csv")
+
+    reorder_cols_from_gmt("data/small_rnaseq.csv", "data/h.all.v2024.1.Hs.entrez.gmt", "/tmp/zog.csv")
+    
     
