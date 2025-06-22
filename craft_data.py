@@ -238,6 +238,32 @@ def craft_gsea_dataset(gct_file_list:list, gmt_file:str, output_folder:str) -> N
                 df_spe.to_csv(f"{output_folder}/{data_file_name}", index=False)
 
 
+
+def craft_small_data() -> None:
+    """Craft a small rnaseq dataset for test purpose"""
+
+    # get a small portion of aorta dataset
+    df_a = pd.read_csv("data/gene_reads_artery_aorta.csv")
+    cols = df_a.columns.drop('ID')
+    sampled_cols = cols.to_series().sample(n=50, random_state=42).tolist()
+    final_cols = ['ID'] + sampled_cols
+    df_a = df_a[final_cols]
+    df_a = df_a[df_a['ID'].isin(list(df_a['ID'].sample(n=50)))]
+    df_a['LABEL'] = 'aorta'
+
+    # get a small fraction of coronary dataset
+    df_b = pd.read_csv("data/gene_reads_artery_coronary.csv")
+    cols = df_b.columns.drop('ID')
+    sampled_cols = cols.to_series().sample(n=50, random_state=42).tolist()
+    final_cols = ['ID'] + sampled_cols
+    df_b = df_b[final_cols]
+    df_b = df_b[df_b['ID'].isin(list(df_b['ID'].sample(n=50)))]
+    df_b['LABEL'] = 'coronary'
+
+    # assemble & save
+    df = pd.concat([df_a, df_b], axis=0)
+    df.to_csv("data/small_rnaseq.csv", index=False)
+
       
 
 if __name__ == "__main__":
@@ -245,6 +271,7 @@ if __name__ == "__main__":
 
     # craft_reduce_datasets(["data/gene_reads_artery_aorta.gct", "data/gene_reads_artery_coronary.gct"], 5)
     # craft_datasets(["data/gene_reads_artery_aorta.gct", "data/gene_reads_artery_coronary.gct"])
-    craft_gsea_dataset(["data/gene_reads_artery_aorta.gct", "data/gene_reads_artery_coronary.gct"], "data/h.all.v2024.1.Hs.entrez.gmt", "/tmp/zog")
+    # craft_gsea_dataset(["data/gene_reads_artery_aorta.gct", "data/gene_reads_artery_coronary.gct"], "data/h.all.v2024.1.Hs.entrez.gmt", "/tmp/zog")
 
     # entrez_to_ensembl(['AGAP12P-203', 'OR4C45-202'])
+    craft_small_data()
