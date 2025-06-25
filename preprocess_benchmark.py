@@ -1,8 +1,13 @@
 import os
 import pandas as pd
 import umap.umap_ as umap
+import glob
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
+
+
+import build_signal
+import extract_gene_order
 
 
 def get_pca(df:pd.DataFrame) -> pd.DataFrame:
@@ -56,7 +61,26 @@ def get_umap(df:pd.DataFrame) -> pd.DataFrame:
     })
     return umap_df
 
-def run(data_file, output_dir):
+
+def get_wav(data_file, output_dir, prox_matrix, audio_duration):
+    """ """
+
+    # get gene order
+    gene_to_pos = extract_gene_order.build_order_from_proximity(prox_matrix)
+
+    # build signal
+    build_signal.build_signal_from_computed_positions_multilabel(data_file, f"{output_dir}/data", gene_to_pos)
+
+    # turn into audio files
+    df = pd.read_csv(data_file)
+    label_list = list(set(list(df['LABEL'])))
+    for label in label_list:
+        for signal_file in glob.glob(f"{output_dir}/data/{label}/*.csv"):
+            build_signal.turn_signal_into_audio(signal_file, audio_duration)
+
+
+
+def run(data_file, output_dir, prox_matrix, audio_duration):
     """ """
 
     # init output folder
@@ -79,6 +103,7 @@ def run(data_file, output_dir):
     df_umap.to_csv(f"{output_dir}/data/umap.csv", index=False)
 
     # save wav data
+    get_wav(data_file, output_dir, prox_matrix, audio_duration)
 
     
 
@@ -90,4 +115,4 @@ def run(data_file, output_dir):
 
 if __name__ == "__main__":
 
-    run("data/small_rnaseq.csv", "/tmp/zooog")
+    run("data/small_rnaseq.csv", "/tmp/zooog2", "data/prox_matrix.csv", 4)

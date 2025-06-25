@@ -113,6 +113,61 @@ def build_signal_from_computed_positions(data_file:str, output_folder:str, gene_
             cmpt+=1
         output_file.close()
 
+def build_signal_from_computed_positions_multilabel(data_file:str, output_folder:str, gene_to_pos:dict):
+    """Build signal from pre-computed positions for each genes
+    Create one signal file per patient
+
+    Args:
+        - data_file (str) : path to the data_file
+        - output_folder (str) : path to the output folder
+        - gene_to_pos (dict) : gene to position
+    
+    """
+
+    # init output folder
+    if not os.path.isdir(output_folder):
+        os.mkdir(output_folder)
+        
+    # laod data
+    df = pd.read_csv(data_file)
+    gene_list = list(gene_to_pos.keys())
+
+    label_list = list(set(list(df['LABEL'])))
+    for label in label_list:
+        df_label = df[df['LABEL'] == label]
+        df_label = df_label.drop(columns=['LABEL'])
+    
+        # Build signal
+        id_to_x = {}
+        id_to_y = {}
+        for index, row in df_label.iterrows():
+            y = []
+            x = []
+            for gene in gene_list:
+                y.append(row[gene])
+                x.append(gene_to_pos[gene])
+            id_to_y[row['ID']] = y
+            id_to_x[row['ID']] = x
+
+        # craft & save signal
+        if not os.path.isdir(f"{output_folder}/{label}"):
+            os.mkdir(f"{output_folder}/{label}")
+
+        # loop over patients
+        for i in id_to_y:
+
+            # vars
+            cmpt = 0
+            y = id_to_y[i]
+            x_positions = id_to_x[i]
+
+            # save signal in file
+            output_file = open(f"{output_folder}/{label}/{i}_signal.csv", "w")
+            output_file.write("x,y\n")
+            for x in x_positions:
+                output_file.write(f"{x},{y[cmpt]}\n")
+                cmpt+=1
+            output_file.close()
 
 
 def ensembl_to_uniprot(ensembl_ids:list) -> dict:
