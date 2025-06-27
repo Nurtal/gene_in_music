@@ -66,7 +66,7 @@ def get_wav(data_file, output_dir, prox_matrix, audio_duration):
     """ """
 
     # get gene order
-    gene_to_pos = extract_gene_order.build_order_from_proximity(prox_matrix)
+    gene_to_pos = extract_gene_order.build_random_gene_order_from_data(data_file)
 
     # build signal
     build_signal.build_signal_from_computed_positions_multilabel(data_file, f"{output_dir}/data", gene_to_pos)

@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.manifold import MDS
 import mygene
 import craft_data
+import random
 
 
 def get_proximity_from_data(data_file_list:list, matrix_save_file:str) -> None:
@@ -26,6 +27,25 @@ def get_proximity_from_data(data_file_list:list, matrix_save_file:str) -> None:
 
     # save matrix
     abs_corr.to_csv(matrix_save_file)
+
+
+def build_random_gene_order_from_data(data_file:str) -> dict:
+    """Build random gene order from a data file (trash dev purpose)"""
+
+    # extract gene in random order
+    df = pd.read_csv(data_file).drop(columns=['ID', 'LABEL'])
+    gene_list = list(df.keys())
+    random.shuffle(gene_list)
+    
+    # craft gene to position
+    gene_to_pos = {}
+    position = 0
+    for gene in gene_list:
+        gene_to_pos[gene] = position
+        position+=1
+
+    return gene_to_pos
+
 
 
 def build_order_from_proximity(prox_matrix_file:str) -> dict:
@@ -114,6 +134,6 @@ if __name__ == "__main__":
     # get_proximity_from_data(['data/gene_reads_artery_aorta.csv', 'data/gene_reads_artery_coronary.csv'], "data/prox_matrix.csv")
     # build_order_from_proximity("data/prox_matrix.csv")
 
-    reorder_cols_from_gmt("data/small_rnaseq.csv", "data/h.all.v2024.1.Hs.entrez.gmt", "/tmp/zog.csv")
+    # reorder_cols_from_gmt("data/small_rnaseq.csv", "data/h.all.v2024.1.Hs.entrez.gmt", "/tmp/zog.csv")
     
-    
+    build_random_gene_order_from_data("data/small_rnaseq.csv")
