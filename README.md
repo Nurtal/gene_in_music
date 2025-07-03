@@ -17,3 +17,5 @@ Very simple projection of genes level transcrition (kind of barblot, genes on x,
   * approche std pour analyser rnaseq : 
       - ssGSEA
       - GSVA
+  
+  * Aligner les signaux pour voir si ça sonne faux ou juste (si un patient s'écarte il dissonne) 
