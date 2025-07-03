@@ -11,3 +11,9 @@ Very simple projection of genes level transcrition (kind of barblot, genes on x,
   - [ ] Achieve good performance on binomial classification
   - [ ] Play with n > 2 targets (gct dataset)
   - [ ] Compare to classic UMAP + CLF approach
+
+
+## Notes :
+  * approche std pour analyser rnaseq : 
+      - ssGSEA
+      - GSVA
