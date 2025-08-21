@@ -124,6 +124,60 @@ def reorder_cols_from_gmt(data_file, gmt_file, output_file):
 
         
 
+
+def extract_order_from_graph_distances(distance_matrix_file:str) -> dict:
+    """Compute gene order from proximity matrix builded from STringDB graph
+
+    Args:
+        - distance_matrix_file (str) : path to the distance matric file
+
+    Returns:
+        - (dict) : gene to position
+    
+    """
+
+    # load distance matrix
+    dist_matrix = pd.read_csv(distance_matrix_file, index_col=0)
+
+    # find a linear order for genes
+    nodes = list(dist_matrix.index)
+    placed = {}
+    
+    # 1. Trouver la paire la plus proche
+    min_dist = float("inf")
+    pair = None
+    for i in nodes:
+        for j in nodes:
+            if i != j and dist_matrix.loc[i, j] < min_dist:
+                min_dist = dist_matrix.loc[i, j]
+                pair = (i, j)
+    
+    a, b = pair
+    placed[a] = 0.0
+    placed[b] = min_dist
+    used = {a, b}
+    
+    # 2. Construire l’ordre
+    current = b
+    while len(used) < len(nodes):
+        # trouver le plus proche voisin de "current" qui n'est pas encore utilisé
+        dists = dist_matrix.loc[current].drop(labels=used)
+        next_gene = dists.idxmin()
+        next_dist = dists.min()
+        
+        placed[next_gene] = placed[current] + next_dist
+        used.add(next_gene)
+        current = next_gene
+    
+    # 3. Retourner l’ordre trié par coordonnée
+    ordered_genes = sorted(placed.items(), key=lambda x: x[1])
+
+    # convert to dict
+    gene_to_pos = {}
+    for elt in ordered_genes:
+        gene_to_pos[elt[0]] = float(elt[1])
+
+    return gene_to_pos
     
 
 
@@ -136,4 +190,6 @@ if __name__ == "__main__":
 
     # reorder_cols_from_gmt("data/small_rnaseq.csv", "data/h.all.v2024.1.Hs.entrez.gmt", "/tmp/zog.csv")
     
-    build_random_gene_order_from_data("data/small_rnaseq.csv")
+    # build_random_gene_order_from_data("data/small_rnaseq.csv")
+
+    extract_order_from_graph_distances("/tmp/dist.csv")
