@@ -9,3 +9,10 @@ je peux améliorer ça). Et Si je faisais de la concaténation des fichiers audi
 du génome et de benchmarquer là dessus.
 [EOF]
 
+## Rereprise du machin
+[DATE] -> 21/08/2025
+[CONTENT] -> Ouai alors là je nage un peu, je me souviens juste que le projet avant un ptin de potentiel.
+J'ai encore eu une nouvelle infra linux entre temps, je redéploi tout ça avec l'ambition d'avoir une petite
+demo sur des faux jeu de données, histoire de faire tourner tout le pipeline et de voir comment ça fonctionne
+[EOF]
+

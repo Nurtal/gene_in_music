@@ -3,6 +3,7 @@ import os
 import glob
 import shutil
 import random
+import sys
 
 # import module
 import craft_toy_data
@@ -14,21 +15,25 @@ import extract_features
 import craft_report
 
 def toy_run():
-    """ """
+    """Demo, create its own toy dataset, build signal, transform to audio and train clf"""
 
     # clean signal folder
+    print("[DEMO] Cleaning")
     old_files = glob.glob(os.path.join("signals", "*"))
     for f in old_files:
         if os.path.isfile(f):
             os.remove(f)
 
     # generate toy dataset
+    print("[DEMO] Creating data ...")
     craft_toy_data.craft_toy_data(50, 50, 25)    
 
     # build signal
+    print("[DEMO] Building signal ...")
     build_signal.build_random_signal("data/toy_data.csv", "signals")
     
     # turn into audio files
+    print("[DEMO] Converting to audio ...")
     for signal_file in glob.glob("signals/*.csv"):
         build_signal.turn_signal_into_audio(signal_file, 4.0)
 
@@ -43,6 +48,7 @@ def toy_run():
             file_list_b.append(audio_file)
             
     # run classification
+    print("[DEMO] Trainning Classifier ...")
     simple_clf.run_svm_clf(file_list_a, file_list_b)
 
 
@@ -288,12 +294,23 @@ def simple_binary_gsea_run(output_folder:str, preprocess_data:bool, audio_durati
 
 if __name__ == "__main__":
 
-    # toy_run()
+   
+    # check script arguments
+    if len(sys.argv) > 1:
+
+        # catch demo mode
+        if sys.argv[1] in ['demo', 'exemple', 'toy']:
+
+            # run demo
+            toy_run()
+        
+
     # simple_reduced_run("/tmp/zog")
 
-    output_folder = "/tmp/zogzog"
-    audio_duration = 10.0
-    J = 2
-    Q = 7
+    # output_folder = "/tmp/zogzog"
+    # audio_duration = 10.0
+    # J = 2
+    # Q = 7
     
-    simple_binary_gsea_run(output_folder, True, audio_duration, J, Q)
+    # simple_binary_gsea_run(output_folder, True, audio_duration, J, Q)
+
