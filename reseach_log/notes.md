@@ -23,3 +23,15 @@ qui ne sert plus à grand chose. L'idée maintenant ce serait d'intégrer une fo
 on pourrait par exemple imaginé que si on detecte le passage d'un fichier de configuration en argument on trigger la fonction avec les
 paramètres contenus dans le fichier, pour ça on a besoin d'un petit mais réel jeu de données.
 [EOF]
+
+## Ajout du mode demo
+[DATE] -> 22/08/2025
+[CONTENT] -> Fin de chantier pour cette semaine, j'ai implémenté une fonction pour un cas d'usage réel, pour l'instant focus sur de la classification
+binomiale avec des données réelles qu'on peut tirer programatiquement depuis kaggle, ça c'est pas mal, pas besoin de se les trainer sur le repo et
+facile à générer / formater à la volée. Le truc c'est que faire un graphe sur tout les gènes j'ai comme dans l'idée que c'est un peu une connerie
+et que ça va prendre des plombes (je vais quand même lancer un job avec 3000 genes pour voir si il tourne), pour les besoins du dev je suis partie
+sur une selection aléatoire de genes, sauf qu'ils ont peu de chances de former un graphe du coup (d'avoir un truc en commun) à moins de baisser
+à mort le threshold de stringDB. Faut que je trouve un système pour gérer les gènes qui se retrouvent pas dans le graphe et un système pour faire 
+un découpage du jeu de données que ai du sens en  terme de pathway, je crois que j'avais déjà commencé à bosser dessus, il y a peut etre des choses à 
+scvanger de ce coté là.
+[EOF]
