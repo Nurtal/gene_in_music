@@ -5,6 +5,7 @@ import shutil
 import random
 import sys
 import pandas as pd
+import yaml
 
 # import module
 import craft_toy_data
@@ -125,6 +126,104 @@ def demo_run():
     # run classification
     print("[DEMO] Training classifier ...")
     simple_clf.run_log_clf(file_list_a, file_list_b, J, Q, "demo/results.csv", audio_duration)
+
+
+def run(configuration_file):
+    """ """
+
+    #-------------#
+    # Prepare Env #
+    #-------------#
+
+    # load configuration
+    with open(configuration_file, "r") as f:
+        config = yaml.safe_load(f)
+
+    # prepare output folder
+    result_folder = config['result_folder']
+    if not os.path.isdir(result_folder):
+        os.mkdir(result_folder)
+    else:
+        old_files = glob.glob(os.path.join(result_folder, "*"))
+        for f in old_files:
+            if os.path.isfile(f):
+                os.remove(f)
+
+
+    #--------------#
+    # Build Signal #
+    #--------------#
+
+    # load data
+    df = pd.read_csv(config['data_file'])
+    gene_list = list(df.keys())[1:-1] # assume first column is ID and last LABEL
+
+    # build gene graph
+    graph_image = f"{result_folder}/graph.png"
+    graph_file = f"{result_folder}/graph.csv"
+    distance_matrix = f"{result_folder}/distance.csv"
+    build_gene_network.build_gene_network(gene_list, graph_image, graph_file, config['stringdb_threshold'])    
+    manage_gene_graph.compute_graph_distance(graph_file, distance_matrix)
+    gene_to_pos = extract_gene_order.extract_order_from_graph_distances(distance_matrix)
+
+    # cleaning data
+    var_to_keep = ['ID']
+    label_list = []
+    for elt in gene_to_pos.keys():
+        var_to_keep.append(elt)
+    for label in df['GROUP']:
+        if label not in label_list:
+            label_list.append(label)
+    for label in label_list:
+        df_grp = df[df['GROUP'] == label]
+        df_grp = df_grp[var_to_keep]
+        df_grp.to_csv(f"{result_folder}/data_group_{label}.csv", index=False)
+
+    # build signal
+    for label in label_list:
+        build_signal.build_signal_from_computed_positions(
+                                                          f"{result_folder}/data_group_{label}.csv",
+                                                          f"{result_folder}/group_{label}",
+                                                          gene_to_pos
+                                                      )
+
+    # turn into audio files
+    for label in label_list:
+        for signal_file in glob.glob(f"{result_folder}/group_{label}/*.csv"):
+            build_signal.turn_signal_into_audio(signal_file, config['audio_duration'])
+    
+    # prepare data for classification
+    label_to_audio_list = {}
+    for label in label_list:
+        label_to_audio_list[label] = glob.glob(f"{result_folder}/group_{label}/*.wav")
+
+    # take samples
+    for label in label_list:
+        audio_file = label_to_audio_list[label][random.randint(0, len(label_to_audio_list[label])-1)]
+        extract_features.display_features(audio_file, config['J'], config['Q'], f"{result_folder}/signal_sample_group_{label}.png")        
+
+    # ---------------#
+    # Run Classifier #
+    #----------------#
+
+    # deal with binary log
+    if config['classifier'] == 'log':
+        if len(label_list) == 2:
+            simple_clf.run_log_clf(
+                    label_to_audio_list[label_list[0]],
+                    label_to_audio_list[label_list[1]],
+                    config['J'],
+                    config['Q'],
+                    f"{result_folder}/results.csv",
+                    config['audio_duration']
+            )
+        else:
+            print("[!] Can't run binary claffication with n labels != 2")
+            
+    
+
+
+
     
 def simple_random_run():
     """Simple binary classification on tissue dataset, use random gene order and random
@@ -379,6 +478,13 @@ if __name__ == "__main__":
         # catch demo mode
         elif sys.argv[1] == "demo":
             demo_run()
+
+        # if argument is an existing file, call run function with provided file as configuration file
+        elif os.path.isfile(sys.argv[1]):
+
+            # test if configuration file is a yaml file
+            if sys.argv[1].split(".")[-1] == "yaml":
+                run(sys.argv[1])
         
 
     # simple_reduced_run("/tmp/zog")
