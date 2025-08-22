@@ -16,3 +16,4 @@ markdown
 weasyprint
 pydub
 pyyaml
+kagglehub

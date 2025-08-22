@@ -5,6 +5,9 @@ import mygene
 import os
 import shutil
 
+# local module
+import get_data
+
 
 def entrez_to_ensembl(entrez_gene_list:list) -> list:
     """Use a manually downloaded ressource file to convert a list of entre gene into a list
@@ -264,6 +267,42 @@ def craft_small_data() -> None:
     df = pd.concat([df_a, df_b], axis=0)
     df.to_csv("data/small_rnaseq.csv", index=False)
 
+
+
+def craft_kaggle_binary_dataset(nb_gene_to_keep:int):
+    """Craft a reduced dataset with random genes and only 2 groups from kaggle real dataset.
+    Intended to generate a simple and esay to use real dataset to test binary classification.
+    If kaggle data file is not detected, run the code to fetch it directly from kaggle
+
+    Args:
+        - nb_gene_to_keep (int) : nb genes to keep in final dataset, randomy selected
+        
+    """
+
+    # download kaggle data if not already there
+    if not os.path.isfile("data/kaggle_dementia.csv"):
+        get_data.get_data_from_kaggle()
+
+    # load data
+    df = pd.read_csv("data/kaggle_dementia.csv")
+
+    # select only 2 labels
+    df = df[df['GROUP'].isin(['TCx', 'HIP'])]
+
+    # select randomy n genes
+    genes = list(df.keys())[1:-1]
+    subset = random.sample(genes, k=nb_gene_to_keep)
+
+    # craft dataset
+    vars = ['ID']
+    for g in subset:
+        vars.append(g)
+    vars.append('GROUP')
+    df = df[vars]
+
+    # save data
+    df.to_csv("data/kaggle_dementia_reduced_binary.csv", index=False)
+
       
 
 if __name__ == "__main__":
@@ -274,4 +313,5 @@ if __name__ == "__main__":
     # craft_gsea_dataset(["data/gene_reads_artery_aorta.gct", "data/gene_reads_artery_coronary.gct"], "data/h.all.v2024.1.Hs.entrez.gmt", "/tmp/zog")
 
     # entrez_to_ensembl(['AGAP12P-203', 'OR4C45-202'])
-    craft_small_data()
+    # craft_small_data()
+    craft_kaggle_binary_dataset(30)
