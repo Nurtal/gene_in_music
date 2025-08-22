@@ -2,7 +2,6 @@ import random
 import pandas as pd
 import os
 
-
 def craft_toy_data(nb_patient_group_a:int, nb_patient_group_b:int, nb_noisy_genes:int) -> None:
     """Craft a toy dataset with 2 groups describe by 10 'genes'.
     Save result file in data subfolder, create it of not exist
@@ -143,6 +142,9 @@ def craft_fake_gene_dataset(nb_patient_group_a:int, nb_patient_group_b:int) -> N
         for g in mtor_list:
             vector[g] = random.randint(0,10)
 
+        # add group
+        vector['GROUP'] = 'A'
+
         # add vector to data
         data.append(vector)
     
@@ -164,6 +166,9 @@ def craft_fake_gene_dataset(nb_patient_group_a:int, nb_patient_group_b:int) -> N
         for g in mtor_list:
             vector[g] = random.randint(0,10)
 
+        # add group
+        vector['GROUP'] = 'B'
+        
         # add vector to data
         data.append(vector)
 

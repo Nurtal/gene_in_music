@@ -4,6 +4,7 @@ import glob
 import shutil
 import random
 import sys
+import pandas as pd
 
 # import module
 import craft_toy_data
@@ -13,27 +14,29 @@ import craft_data
 import extract_gene_order
 import extract_features
 import craft_report
+import build_gene_network
+import manage_gene_graph
 
 def toy_run():
-    """Demo, create its own toy dataset, build signal, transform to audio and train clf"""
+    """Toy, create its own toy dataset, build signal, transform to audio and train clf"""
 
     # clean signal folder
-    print("[DEMO] Cleaning")
+    print("[TOY] Cleaning")
     old_files = glob.glob(os.path.join("signals", "*"))
     for f in old_files:
         if os.path.isfile(f):
             os.remove(f)
 
     # generate toy dataset
-    print("[DEMO] Creating data ...")
+    print("[TOY] Creating data ...")
     craft_toy_data.craft_toy_data(50, 50, 25)    
 
     # build signal
-    print("[DEMO] Building signal ...")
+    print("[TOY] Building signal ...")
     build_signal.build_random_signal("data/toy_data.csv", "signals")
     
     # turn into audio files
-    print("[DEMO] Converting to audio ...")
+    print("[TOY] Converting to audio ...")
     for signal_file in glob.glob("signals/*.csv"):
         build_signal.turn_signal_into_audio(signal_file, 4.0)
 
@@ -48,10 +51,81 @@ def toy_run():
             file_list_b.append(audio_file)
             
     # run classification
-    print("[DEMO] Trainning Classifier ...")
+    print("[TOY] Trainning Classifier ...")
     simple_clf.run_svm_clf(file_list_a, file_list_b)
 
 
+def demo_run():
+    """Demo run, showcase on generated fake gene data"""
+
+    # params
+    graph_image = "demo/graph.png"
+    graph_file = "demo/graph.pickle"
+    distance_matrix = "demo/dist.csv"
+    audio_duration = 4.0
+    J = 2
+    Q = 4
+
+    # clean signal folder
+    print("[DEMO] Cleaning")
+    if not os.path.isdir("demo"):
+        os.mkdir("demo")
+    else:
+        old_files = glob.glob(os.path.join("demo", "*"))
+        for f in old_files:
+            if os.path.isfile(f):
+                os.remove(f)
+
+    # generate fake gene dataset
+    print("[DEMO] Creating data ...")
+    craft_toy_data.craft_fake_gene_dataset(50,50)
+    df = pd.read_csv('data/fake_gene_data.csv')
+    gene_list = list(df.keys())[1:-1]
+
+    # build gene graph
+    print("[DEMO] Building graph ...")
+    build_gene_network.build_gene_network(gene_list, graph_image, graph_file, 500)    
+    manage_gene_graph.compute_graph_distance(graph_file, distance_matrix)
+    gene_to_pos = extract_gene_order.extract_order_from_graph_distances(distance_matrix)
+
+    # cleaning data
+    var_to_keep = ['ID']
+    for elt in gene_to_pos.keys():
+        var_to_keep.append(elt)
+    df_a = df[df['GROUP']=='A']
+    df_b = df[df['GROUP']=='B']
+    df_a = df_a[var_to_keep]
+    df_b = df_b[var_to_keep]
+    df_a.to_csv("demo/data_group_a.csv", index=False)
+    df_b.to_csv("demo/data_group_b.csv", index=False)
+
+    # build signal
+    print("[DEMO] Building signal ...")
+    build_signal.build_signal_from_computed_positions("demo/data_group_a.csv", "demo/group_a", gene_to_pos)
+    build_signal.build_signal_from_computed_positions("demo/data_group_b.csv", "demo/group_b", gene_to_pos)
+
+    # turn into audio files
+    print("[DEMO] Turning signal into audio ...")
+    for signal_file in glob.glob("demo/group_a/*.csv"):
+        build_signal.turn_signal_into_audio(signal_file, audio_duration)
+    for signal_file in glob.glob("demo/group_b/*.csv"):
+        build_signal.turn_signal_into_audio(signal_file, audio_duration)
+
+    # prepare data for classification
+    file_list_a = glob.glob("demo/group_a/*.wav")
+    file_list_b = glob.glob("demo/group_b/*.wav")
+
+    # take samples
+    print("[DEMO] Sampling ...")
+    audio_file = file_list_a[random.randint(0, len(file_list_a)-1)]
+    extract_features.display_features(audio_file, J, Q, f"demo/signal_sample_group_a.png")        
+    audio_file = file_list_b[random.randint(0, len(file_list_b)-1)]
+    extract_features.display_features(audio_file, J, Q, f"demo/signal_sample_group_b.png")        
+    
+    # run classification
+    print("[DEMO] Training classifier ...")
+    simple_clf.run_log_clf(file_list_a, file_list_b, J, Q, "demo/results.csv", audio_duration)
+    
 def simple_random_run():
     """Simple binary classification on tissue dataset, use random gene order and random
     gene selection, basically there just to make sure this stuff compile on real data"""
@@ -131,7 +205,7 @@ def simple_reduced_run(output_folder):
         save_file = audio_file.split("/")[-1].replace(".wav", "_class_b.png")
         extract_features.display_features(audio_file, J, Q, f"{output_folder}/signal_samples/{save_file}")        
 
-    # un classification
+    # run classification
     simple_clf.run_log_clf(file_list_a, file_list_b, J, Q, f"{output_folder}/results.csv", audio_duration)
 
 
@@ -298,11 +372,13 @@ if __name__ == "__main__":
     # check script arguments
     if len(sys.argv) > 1:
 
-        # catch demo mode
-        if sys.argv[1] in ['demo', 'exemple', 'toy']:
-
-            # run demo
+        # catch toy mode
+        if sys.argv[1] == 'toy':
             toy_run()
+
+        # catch demo mode
+        elif sys.argv[1] == "demo":
+            demo_run()
         
 
     # simple_reduced_run("/tmp/zog")

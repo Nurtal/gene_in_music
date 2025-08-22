@@ -44,7 +44,10 @@ def build_gene_network(gene_list:list, graph_image_file:str, graph_save_file:str
             gene1 = items[2]
             gene2 = items[3]
             score = float(items[5])
-            G.add_edge(gene1, gene2, weight=score)
+
+            # make sure we are using only genes present in gene_list
+            if gene1 in gene_list and gene2 in gene_list:
+                G.add_edge(gene1, gene2, weight=score)
 
     # save graph data
     pickle.dump(G, open(graph_save_file, 'wb'))
