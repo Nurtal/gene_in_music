@@ -6,6 +6,19 @@ Very simple projection of genes level transcrition (kind of barblot, genes on x,
 - reorder genes to have good classification performance
 - Play with frequencies (place gene modules close together, put space between faraway genes)
 
+
+## Usage
+
+### Toy mode
+Just a toy mode to run quick and simple results, ensure that the code is working
+-  run.py toy
+
+
+### Demo mode
+Demo mode to showcase the idea, generate a demo folder containing various results
+- run.py demo
+
+
 ## Plan - Tier 1
   - [ ] Operational worfklow
   - [ ] Achieve good performance on binomial classification
