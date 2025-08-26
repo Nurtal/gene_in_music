@@ -4,6 +4,7 @@ from sklearn.manifold import MDS
 import mygene
 import craft_data
 import random
+import time
 
 
 def get_proximity_from_data(data_file_list:list, matrix_save_file:str) -> None:
@@ -238,6 +239,8 @@ def extract_order_from_protein_distances(data_file:str, protein_link_file:str, p
     df = df[df['protein2']!=root]
 
     # its been a while since i used one of these
+    iteration = 0
+    start = time.time()
     while len(list(id_to_pos.keys())) < len(list(id_to_gene.keys())):
 
         # create sub df focus on pivot
@@ -256,6 +259,13 @@ def extract_order_from_protein_distances(data_file:str, protein_link_file:str, p
         df = df[df['protein1']!=root]
         df = df[df['protein2']!=root]
 
+        # display pregress
+        iteration +=1
+        progress = (len(list(id_to_pos.keys())) / len(list(id_to_gene.keys()))) * 100.0
+        current_time = time.time()
+        duration = current_time - start
+        print(f"[ORDERING GENES][{iteration}][DURATION:{duration}] => {progress} ({len(list(id_to_pos.keys()))} / {len(list(id_to_gene.keys()))})")
+        
     # translate ids
     id_to_pos_clean = {}
     for i in id_to_pos:
@@ -281,5 +291,5 @@ if __name__ == "__main__":
 
     # extract_order_from_graph_distances("/tmp/dist.csv")
     
-    m = extract_order_from_protein_distances("data/fake_gene_data.csv", "data/9606.protein.links.v12.0.txt", "data/9606.protein.info.v12.0.txt", "/tmp/zog.log")
+    m = extract_order_from_protein_distances("data/kaggle_dementia.csv", "data/9606.protein.links.v12.0.txt", "data/9606.protein.info.v12.0.txt", "/tmp/zog.log")
     print(m)
