@@ -182,6 +182,93 @@ def extract_order_from_graph_distances(distance_matrix_file:str) -> dict:
 
 
 
+def extract_order_from_protein_distances(data_file:str, protein_link_file:str, protein_info_file:str, log_file:str) -> dict:
+    """Extract gene order using proximiy between associated proteins, from a local data file.
+
+    Args:
+        - data_file (str) : path to input data file, should contain gene in 'preferred_name' format (e.g EGFR, IFN ...)
+        - protein_link_file (str) : path to ressource file downloaded from stringdb
+        - protein_info_file (str) : path to ressource file downloaded from stringdb, used for ids converstion
+        - log_file (str) : path to generated log file, contain list of ids that failed conversion
+
+    Returns:
+        - (dict) : keys are gene in preferred_name format, associated values are their assign position
+        
+    """
+
+    # load data and extract genes to consider
+    df = pd.read_csv(data_file)
+    genes = []
+    for k in list(df.keys()):
+        if k not in ['ID', 'GROUP', 'LABEL']:
+            genes.append(k)
+
+    # get gene to gene id
+    id_to_gene = {}
+    df = pd.read_csv(protein_info_file, sep="\t")
+    df = df[df['preferred_name'].isin(genes)]
+    for index, row in df.iterrows():
+        id_to_gene[row['#string_protein_id']] = row['preferred_name']
+
+    # check missing genes
+    log_data = open(log_file, "w")
+    log_data.write("MISSING\n")
+    for g in genes:
+        if g not in list(id_to_gene.values()):
+            log_data.write(f"{g}\n")
+    log_data.close()
+
+    # load and filter ressource file on genes
+    df = pd.read_csv(protein_link_file, sep=" ")
+    df = df[df['protein1'].isin(list(id_to_gene.keys()))]
+    df = df[df['protein2'].isin(list(id_to_gene.keys()))]
+
+    # compute gene order
+    id_to_pos = {}
+    pos = 0
+    
+    # init - find the closes entry in the dataset
+    row_max = df.loc[df["combined_score"].idxmax()]
+    id_to_pos[row_max['protein1']] = pos
+    pos += float(1/row_max['combined_score'])
+    id_to_pos[row_max['protein2']] = pos
+    pivot = row_max['protein2']
+    root = row_max['protein1']
+    df = df[df['protein1']!=root]
+    df = df[df['protein2']!=root]
+
+    # its been a while since i used one of these
+    while len(list(id_to_pos.keys())) < len(list(id_to_gene.keys())):
+
+        # create sub df focus on pivot
+        df_sub = df[df['protein1']==pivot]
+
+        # find closest entry
+        row_max = df_sub.loc[df_sub["combined_score"].idxmax()]
+
+        # assign pos to closes entry
+        pos += float(1/row_max['combined_score'])
+        id_to_pos[row_max['protein2']] = pos
+
+        # update, closes entry become next pivot, remove old pivot from df
+        pivot = row_max['protein2']
+        root = row_max['protein1']
+        df = df[df['protein1']!=root]
+        df = df[df['protein2']!=root]
+
+    # translate ids
+    id_to_pos_clean = {}
+    for i in id_to_pos:
+        id_to_pos_clean[id_to_gene[i]] = id_to_pos[i]
+    id_to_pos = id_to_pos_clean
+
+    return id_to_pos
+        
+    
+
+    
+
+
 
 if __name__ == "__main__":
 
@@ -192,4 +279,7 @@ if __name__ == "__main__":
     
     # build_random_gene_order_from_data("data/small_rnaseq.csv")
 
-    extract_order_from_graph_distances("/tmp/dist.csv")
+    # extract_order_from_graph_distances("/tmp/dist.csv")
+    
+    m = extract_order_from_protein_distances("data/fake_gene_data.csv", "data/9606.protein.links.v12.0.txt", "data/9606.protein.info.v12.0.txt", "/tmp/zog.log")
+    print(m)

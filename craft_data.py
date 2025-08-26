@@ -314,4 +314,4 @@ if __name__ == "__main__":
 
     # entrez_to_ensembl(['AGAP12P-203', 'OR4C45-202'])
     # craft_small_data()
-    craft_kaggle_binary_dataset(30)
+    craft_kaggle_binary_dataset(5000)
