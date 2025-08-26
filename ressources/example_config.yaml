@@ -1,8 +1,8 @@
 J: 4
 Q: 2
 audio_duration: 4.0
-data_file: "data/kaggle_dementia_reduced_binary.csv"
-result_folder: "/tmp/GIM2"
+data_file: "data/fake_gene_data.csv"
+result_folder: "/tmp/GIM3"
 stringdb_threshold: 100
 classifier: log
 
