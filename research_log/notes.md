@@ -35,3 +35,13 @@ sur une selection aléatoire de genes, sauf qu'ils ont peu de chances de former 
 un découpage du jeu de données que ai du sens en  terme de pathway, je crois que j'avais déjà commencé à bosser dessus, il y a peut etre des choses à 
 scvanger de ce coté là.
 [EOF]
+
+## update du run
+[DATE] -> 26/08/2025
+[CONTENT] -> J'ai bossé sur une nouvelle mouture de la fonction run du module run, l'idée est de faire le calcul de l'ordre des gènes
+en s'appuyant sur des ressources téléchargées directement depuis stringdb plutot que de passer par l'API et de se faire bouler quand les
+requêtes sont trops grosses. Je test un pipeline complet sur les données reelle de Kaggle -> besoin de rien, on peut tout télécharger.
+Bcp de gene donc l'algo de calculs de position prends du temps, je sais pas si ça se parallelise, de tte façons on va faire tourner ça sur la nuit.
+Je commence à me demander quelles pourraient être les applications au single cell rnaseq, j'ai l'impression que c'est ce qui en vogue en ce moment,
+ça vaudrait le coup d'y jeter un coup d'oeil 
+[EOF]

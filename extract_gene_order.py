@@ -246,25 +246,31 @@ def extract_order_from_protein_distances(data_file:str, protein_link_file:str, p
         # create sub df focus on pivot
         df_sub = df[df['protein1']==pivot]
 
-        # find closest entry
-        row_max = df_sub.loc[df_sub["combined_score"].idxmax()]
+        # check that there is something in the sub df
+        if df_sub.shape[0] > 0:
 
-        # assign pos to closes entry
-        pos += float(1/row_max['combined_score'])
-        id_to_pos[row_max['protein2']] = pos
+            # find closest entry
+            row_max = df_sub.loc[df_sub["combined_score"].idxmax()]
 
-        # update, closes entry become next pivot, remove old pivot from df
-        pivot = row_max['protein2']
-        root = row_max['protein1']
-        df = df[df['protein1']!=root]
-        df = df[df['protein2']!=root]
+            # assign pos to closes entry
+            pos += float(1/row_max['combined_score'])
+            id_to_pos[row_max['protein2']] = pos
 
-        # display pregress
-        iteration +=1
-        progress = (len(list(id_to_pos.keys())) / len(list(id_to_gene.keys()))) * 100.0
-        current_time = time.time()
-        duration = current_time - start
-        print(f"[ORDERING GENES][{iteration}][DURATION:{duration}] => {progress} ({len(list(id_to_pos.keys()))} / {len(list(id_to_gene.keys()))})")
+            # update, closes entry become next pivot, remove old pivot from df
+            pivot = row_max['protein2']
+            root = row_max['protein1']
+            df = df[df['protein1']!=root]
+            df = df[df['protein2']!=root]
+
+            # display pregress
+            iteration +=1
+            progress = (len(list(id_to_pos.keys())) / len(list(id_to_gene.keys()))) * 100.0
+            current_time = time.time()
+            duration = current_time - start
+            print(f"[ORDERING GENES][{iteration}][DURATION:{duration}] => {progress} ({len(list(id_to_pos.keys()))} / {len(list(id_to_gene.keys()))})")
+        else:
+            print("[!]PREMATURE STOP")
+            break
         
     # translate ids
     id_to_pos_clean = {}
