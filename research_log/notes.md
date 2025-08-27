@@ -20,7 +20,7 @@ demo sur des faux jeu de données, histoire de faire tourner tout le pipeline et
 [DATE] -> 22/08/2025
 [CONTENT] -> Ajout du mode demo dans le run.py, ça commence à être un peu le bordel dans ce fichier, il y a surement pas mal de code
 qui ne sert plus à grand chose. L'idée maintenant ce serait d'intégrer une fonction dans run qui fonctionne sur de vraies donnée,
-on pourrait par exemple imaginé que si on detecte le passage d'un fichier de configuration en argument on trigger la fonction avec les
+on pourrait par exemple imaginer que si on detecte le passage d'un fichier de configuration en argument on trigger la fonction avec les
 paramètres contenus dans le fichier, pour ça on a besoin d'un petit mais réel jeu de données.
 [EOF]
 
@@ -44,4 +44,12 @@ requêtes sont trops grosses. Je test un pipeline complet sur les données reell
 Bcp de gene donc l'algo de calculs de position prends du temps, je sais pas si ça se parallelise, de tte façons on va faire tourner ça sur la nuit.
 Je commence à me demander quelles pourraient être les applications au single cell rnaseq, j'ai l'impression que c'est ce qui en vogue en ce moment,
 ça vaudrait le coup d'y jeter un coup d'oeil 
+[EOF]
+
+## stratification ?
+[DATE] -> 27/08/2025
+[CONTENT] -> Implémentation d'un kmeans & évaluation de clustering qui prends en entrée les fichier audio, l'idée c'est d'explorer le coté stratification,
+l'intuition globale c'est que notre tour de magie permet de représenter les patients dans un espace fréquentiel, ce qui est pas un truc fréquent (lol),
+en gros une des conditions de victoire qu'on peut imaginer c'est voir si on stratifie suffisement bien les patients pour faire de la prédiction de réponse
+aux traitements, sur precisesads par exemple ...
 [EOF]
