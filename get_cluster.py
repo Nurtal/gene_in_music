@@ -1,11 +1,13 @@
 import glob
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score, adjusted_rand_score, normalized_mutual_info_score
+import pandas as pd
 
 
 
 # import local module
 import extract_features
+
 
 
 def run_kmeans(file_list:list, J:int, Q:int, result_file:str, audio_duration:float, k:int) -> None:
@@ -50,21 +52,69 @@ def run_kmeans(file_list:list, J:int, Q:int, result_file:str, audio_duration:flo
     
 
 
-def evaluate_clustering(prediction_file, manifest_file):
-    """ """
+def evaluate_clustering(prediction_file:str, manifest_file:str, result_file:str) -> None:
+    """Run clustering evaluation
+    
+    Args:
+        - prediction_file (str) : csv file containing cluster prediction
+        - manifest_file (str) : csv file containg true label of files
+        - result_file (str) : output file to save the evaluation metrics
+    
+    """
 
+    # load file to prediction
+    file_to_prediction = {}
+    df = pd.read_csv(prediction_file)
+    for index, row in df.iterrows():
+        file_to_prediction[row['FILE']] = row['LABEL']
 
-    sil_score = silhouette_score(X, y_pred)
+    # load file to label    
+    file_to_label = {}
+    df = pd.read_csv(manifest_file)
+    for index, row in df.iterrows():
+        file_to_label[row['FILE']] = row['LABEL']
+
+    # extract pred and true
+    y_true = []
+    y_pred = []
+    for k in list(file_to_label.keys()):
+        y_true.append(file_to_label[k])
+        y_pred.append(file_to_prediction[k])
+
+    # Compute adjusted Rand Index
+    ari = adjusted_rand_score(y_true, y_pred)
+
+    # Compute normalized Mutual Information
+    nmi = normalized_mutual_info_score(y_true, y_pred)
+
+    # save results
+    output_data = open(result_file, "w")
+    output_data.write("METRIC,VALUE\n")
+    output_data.write(f"ADJUSTED-RAND-INDEX,{ari}\n")
+    output_data.write(f"NORMALIZED-MUTUAL-INFORMATION,{nmi}\n")
+    output_data.close()
+
 
 
 
 if __name__ == "__main__":
 
 
-    file_list = glob.glob("demo/group_a/*.wav")
-    for elt in glob.glob("demo/group_b/*.wav"):
+    # prepare data & manifest
+    file_list = []
+    file_list_a = glob.glob("demo/group_a/*.wav")
+    file_list_b = glob.glob("demo/group_b/*.wav")
+    manifest_file = open("demo/manifest.csv", "w")
+    manifest_file.write("FILE,LABEL\n")
+    for elt in file_list_a:
         file_list.append(elt)
-
-    run_kmeans(file_list, 2, 4, "/tmp/results.csv", 4.0, 2)
-
+        manifest_file.write(f"{elt},0\n")
+    for elt in file_list_b:
+        file_list.append(elt)
+        manifest_file.write(f"{elt},1\n")
+    manifest_file.close()
     
+
+    # run_kmeans(file_list, 2, 4, "/tmp/results.csv", 4.0, 2)
+
+    evaluate_clustering("/tmp/results.csv", "demo/manifest.csv", "/tmp/cluster.csv")    
