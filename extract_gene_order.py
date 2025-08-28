@@ -287,8 +287,6 @@ def extract_order_from_protein_distances(data_file:str, protein_link_file:str, p
 
     
 
-
-
 if __name__ == "__main__":
 
     # get_proximity_from_data(['data/gene_reads_artery_aorta.csv', 'data/gene_reads_artery_coronary.csv'], "data/prox_matrix.csv")
@@ -300,4 +298,4 @@ if __name__ == "__main__":
 
     # extract_order_from_graph_distances("/tmp/dist.csv")
     
-    extract_order_from_protein_distances("data/kaggle_dementia.csv", "data/9606.protein.links.v12.0.txt", "data/9606.protein.info.v12.0.txt", "/tmp/zog.log", "data/computed_positions.csv")
+    extract_order_from_protein_distances("data/fake_gene_data.csv", "data/9606.protein.links.v12.0.txt", "data/9606.protein.info.v12.0.txt", "/tmp/zog.log", "data/computed_positions.csv")

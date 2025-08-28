@@ -48,20 +48,23 @@ def get_data_from_kaggle():
 
 
 
-def get_data_from_stringdb(link_save_path:str, info_save_path:str) -> None:
+def get_data_from_stringdb(link_save_path:str, info_save_path:str, map_save_path:str) -> None:
     """Download ressources file for gene order computation from stringdb
     
     Args:
         - link_save_path (str) : path to link save file (usually a txt file, gz decompression is handle within the function)
         - info_save_path (str) : path to info save file (usually a txt file, gz decompression is handle within the function)
+        - map_save_path (str) : path to alias save file (usually a txt file, gz decompression is handle within the function)
     
     """
 
     # params
     link_file_url = "https://stringdb-downloads.org/download/protein.links.v12.0/9606.protein.links.v12.0.txt.gz"
     info_file_url = "https://stringdb-downloads.org/download/protein.info.v12.0/9606.protein.info.v12.0.txt.gz"
+    map_file_url = "https://stringdb-static.org/download/protein.aliases.v11.0.txt.gz"
     link_tmp_path = "/tmp/link_protein.gz"
     info_tmp_path = "/tmp/info_protein.gz"
+    map_tmp_path = "/tmp/map_protein.gz"
 
     # download protein link file and extract gz content
     response = requests.get(link_file_url)
@@ -81,9 +84,18 @@ def get_data_from_stringdb(link_save_path:str, info_save_path:str) -> None:
             shutil.copyfileobj(f_in, f_out)
     os.remove(info_tmp_path)
 
+    # download protein map file and extract gz content
+    response = requests.get(map_file_url)
+    with open(map_tmp_path, 'wb') as f:
+        f.write(response.content)
+    with gzip.open(map_tmp_path, "rb") as f_in:
+        with open(map_save_path, "wb") as f_out:
+            shutil.copyfileobj(f_in, f_out)
+    os.remove(map_tmp_path)
 
+    
 if __name__ == "__main__":
 
     # get_data_from_kaggle()
-    get_data_from_stringdb("/tmp/soubidou.txt", "/tmp/mashcidnefff.txt")
+    get_data_from_stringdb("/tmp/soubidou.txt", "/tmp/mashcidnefff.txt", "/tmp/alias.txt")
     
