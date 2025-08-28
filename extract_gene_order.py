@@ -183,7 +183,7 @@ def extract_order_from_graph_distances(distance_matrix_file:str) -> dict:
 
 
 
-def extract_order_from_protein_distances(data_file:str, protein_link_file:str, protein_info_file:str, log_file:str) -> dict:
+def extract_order_from_protein_distances(data_file:str, protein_link_file:str, protein_info_file:str, log_file:str, position_file:str):
     """Extract gene order using proximiy between associated proteins, from a local data file.
 
     Args:
@@ -191,10 +191,8 @@ def extract_order_from_protein_distances(data_file:str, protein_link_file:str, p
         - protein_link_file (str) : path to ressource file downloaded from stringdb
         - protein_info_file (str) : path to ressource file downloaded from stringdb, used for ids converstion
         - log_file (str) : path to generated log file, contain list of ids that failed conversion
-
-    Returns:
-        - (dict) : keys are gene in preferred_name format, associated values are their assign position
-        
+        - position_file (str) : path to generated position file, where results are saved 
+       
     """
 
     # load data and extract genes to consider
@@ -278,8 +276,13 @@ def extract_order_from_protein_distances(data_file:str, protein_link_file:str, p
         id_to_pos_clean[id_to_gene[i]] = id_to_pos[i]
     id_to_pos = id_to_pos_clean
 
-    return id_to_pos
-        
+    # save in a result file
+    result_data = open(position_file, "w")
+    result_data.write("GENE,POS\n")
+    for i in id_to_pos:
+        result_data.write(f"{i},{id_to_pos[i]}\n")
+    result_data.close()
+            
     
 
     
@@ -297,5 +300,4 @@ if __name__ == "__main__":
 
     # extract_order_from_graph_distances("/tmp/dist.csv")
     
-    m = extract_order_from_protein_distances("data/kaggle_dementia.csv", "data/9606.protein.links.v12.0.txt", "data/9606.protein.info.v12.0.txt", "/tmp/zog.log")
-    print(m)
+    extract_order_from_protein_distances("data/kaggle_dementia.csv", "data/9606.protein.links.v12.0.txt", "data/9606.protein.info.v12.0.txt", "/tmp/zog.log", "data/computed_positions.csv")
