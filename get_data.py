@@ -97,5 +97,5 @@ def get_data_from_stringdb(link_save_path:str, info_save_path:str, map_save_path
 if __name__ == "__main__":
 
     # get_data_from_kaggle()
-    get_data_from_stringdb("/tmp/soubidou.txt", "/tmp/mashcidnefff.txt", "/tmp/alias.txt")
+    get_data_from_stringdb("/tmp/soubidou.txt", "/tmp/mashcidnefff.txt", "data/stringdb_alias.txt")
     

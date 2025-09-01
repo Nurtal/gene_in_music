@@ -6,6 +6,9 @@ import craft_data
 import random
 import time
 
+from mygene import MyGeneInfo
+
+
 
 def get_proximity_from_data(data_file_list:list, matrix_save_file:str) -> None:
     """Compute proximity beween genes as the absolute correlation of genes expression within the merged datasets
@@ -283,9 +286,75 @@ def extract_order_from_protein_distances(data_file:str, protein_link_file:str, p
         result_data.write(f"{i},{id_to_pos[i]}\n")
     result_data.close()
             
-    
 
+def get_ensembl_genes(genes:list) -> dict:
+    """Extract a dictionarry gene to ensembl ids, where input genes are suppused to be gene symbol (e.g EGFR)
+
+    Args:
+        - genes (list) : list of genes symbol
+
+    Returns:
+        - (dict) : keys are symbol and values are associated list of ensembl ids
     
+    """
+
+    # init mygene object
+    mg = MyGeneInfo()
+    results = mg.querymany(
+        genes,
+        scopes="symbol",     # type d'input
+        fields="ensembl.gene",  # ce qu'on veut récupérer
+        species="human"      # Homo sapiens
+    )
+
+    # Convertir en DataFrame
+    df = pd.DataFrame(results)
+    df_simple = df[["query", "ensembl"]]
+
+    # Normaliser le champ "ensembl" (car parfois c'est une liste de dicts)
+    def extract_ensg(x):
+        if isinstance(x, list):
+            return [d["gene"] for d in x]  # plusieurs ENSG possibles
+        elif isinstance(x, dict):
+            return x.get("gene")
+        return None
+
+    # compute gene to ensembl
+    gene_to_ensembl = {}
+    df_simple["ENSG"] = df_simple["ensembl"].apply(extract_ensg)
+    for index, row in df_simple.iterrows():
+
+        k = row['query']
+        ensembl = row['ENSG']
+
+        if isinstance(ensembl, list):
+            gene_to_ensembl[k] = ensembl
+        elif ensembl:
+            gene_to_ensembl[k] = [ensembl]
+
+    return gene_to_ensembl
+
+
+def compute_gene_to_gene_distances(data_file, link_file, alias_filei, info_file, log_file):
+    """ """
+
+    # load gene list
+    df = pd.read_csv(data_file)
+    genes = list(df.keys())[1:-1]
+
+    # convert to ENSG id
+    symbol_to_id = get_ensembl_genes(genes)
+    id_list = []
+    for sub_id_list in symbol_to_id.values():
+        for i in sub_id_list:
+            if i not in id_list:
+                id_list.append(i)
+
+    # Mapp ENSG to ENSP
+    print(id_list)
+
+    # compute distance
+
 
 if __name__ == "__main__":
 
@@ -298,4 +367,6 @@ if __name__ == "__main__":
 
     # extract_order_from_graph_distances("/tmp/dist.csv")
     
-    extract_order_from_protein_distances("data/fake_gene_data.csv", "data/9606.protein.links.v12.0.txt", "data/9606.protein.info.v12.0.txt", "/tmp/zog.log", "data/computed_positions.csv")
+    # extract_order_from_protein_distances("data/fake_gene_data.csv", "data/9606.protein.links.v12.0.txt", "data/9606.protein.info.v12.0.txt", "/tmp/zog.log", "data/computed_positions.csv")
+
+    compute_gene_to_gene_distances("data/fake_gene_data.csv", "data/9606.protein.links.v12.0.txt", "data/stringdn_alias.txt", "data/9606.protein.info.v12.0.txt", "/tmp/zog.log")
