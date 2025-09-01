@@ -335,7 +335,7 @@ def get_ensembl_genes(genes:list) -> dict:
     return gene_to_ensembl
 
 
-def compute_gene_to_gene_distances(data_file, link_file, alias_filei, info_file, log_file):
+def compute_gene_to_gene_distances(data_file, link_file, alias_file, info_file, log_file):
     """ """
 
     # load gene list
@@ -344,14 +344,16 @@ def compute_gene_to_gene_distances(data_file, link_file, alias_filei, info_file,
 
     # convert to ENSG id
     symbol_to_id = get_ensembl_genes(genes)
-    id_list = []
+    ensg_list = []
     for sub_id_list in symbol_to_id.values():
         for i in sub_id_list:
-            if i not in id_list:
-                id_list.append(i)
+            if i not in ensg_list:
+                ensg_list.append(i)
 
     # Mapp ENSG to ENSP
-    print(id_list)
+    aliases = pd.read_csv(alias_file, sep="\t", skiprows=1, names=["protein", "alias", "source"])
+    ensg_map = aliases[aliases["alias"].isin(ensg_list)][["alias", "protein"]]
+    print(ensg_map)
 
     # compute distance
 
@@ -369,4 +371,4 @@ if __name__ == "__main__":
     
     # extract_order_from_protein_distances("data/fake_gene_data.csv", "data/9606.protein.links.v12.0.txt", "data/9606.protein.info.v12.0.txt", "/tmp/zog.log", "data/computed_positions.csv")
 
-    compute_gene_to_gene_distances("data/fake_gene_data.csv", "data/9606.protein.links.v12.0.txt", "data/stringdn_alias.txt", "data/9606.protein.info.v12.0.txt", "/tmp/zog.log")
+    compute_gene_to_gene_distances("data/fake_gene_data.csv", "data/9606.protein.links.v12.0.txt", "data/stringdb_alias.txt", "data/9606.protein.info.v12.0.txt", "/tmp/zog.log")
