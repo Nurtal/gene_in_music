@@ -336,13 +336,13 @@ def get_ensembl_genes(genes:list) -> dict:
 
 
 def compute_gene_to_gene_distances(data_file:str, link_file:str, alias_file:str, output_file:str) -> None:
-    """Use protein links and alias to craft a gene distance file
+    """Use protein links and alias to craft two gene distance file (all distances and filtered distances, keep only the closest distance between symbols)
 
     Args:
         - data_file (str) : path to input data file, supposed to contains gene symbols as column, a first id column and a last label / group column
         - link_file (str) : path to stringdb links file
         - alias_file (str) : path to stringdb alias file
-        - output_file (str) : path to save file 
+        - output_file (str) : path to save file (generate also a _filtered file containing only the best symbols distances) 
     
     """
 
@@ -352,11 +352,14 @@ def compute_gene_to_gene_distances(data_file:str, link_file:str, alias_file:str,
 
     # convert to ENSG id
     symbol_to_id = get_ensembl_genes(genes)
+    id_to_symbol = {}
     ensg_list = []
-    for sub_id_list in symbol_to_id.values():
+    for symbol in symbol_to_id:
+        sub_id_list = symbol_to_id[symbol]
         for i in sub_id_list:
             if i not in ensg_list:
                 ensg_list.append(i)
+                id_to_symbol[i] = symbol
 
     # Mapp ENSG to ENSP
     aliases = pd.read_csv(alias_file, sep="\t", skiprows=1, names=["protein", "alias", "source"])
@@ -383,13 +386,104 @@ def compute_gene_to_gene_distances(data_file:str, link_file:str, alias_file:str,
     )
 
     # Convertir en distances
+    gene_links["symbol1"] = gene_links["gene1"].replace(id_to_symbol)
+    gene_links["symbol2"] = gene_links["gene2"].replace(id_to_symbol)
     gene_links["distance"] = 1 - (gene_links["combined_score"] / 1000)
+
+    # keep only best values
+    gene_links_filtered = gene_links.loc[gene_links.groupby(["symbol1", "symbol2"])["distance"].idxmin()].reset_index(drop=True)
 
     # save
     gene_links.to_csv(output_file, index=False)
+    gene_links_filtered.to_csv(output_file.replace(".csv", "_filtered.csv"), index=False)
 
 
     
+def extract_order_from_gene_distances(data_file:str, gene_distance_file:str, position_file:str, log_file:str) -> dict:
+    """Extract gene order using proximiy between associated proteins, from a local data file.
+
+    Args:
+        - data_file (str) : path to input data file, should contain gene in 'preferred_name' format (e.g EGFR, IFN ...)
+        - gene_distance_file (str) : file containing computed distances between genes
+        - position_file (str) : path to generated position file, where results are saved 
+        - log_file (str) : path to log file, store unavailable genes
+
+    Returns:
+        - (dict) : symbol to position
+       
+    """
+
+    # load data and extract genes to consider
+    df = pd.read_csv(data_file)
+    genes = list(df.keys())[1:-1]
+
+    # check genes available in distance file
+    df = pd.read_csv(gene_distance_file)
+    available_genes = []
+    for x in list(df['symbol1']):
+        if x not in available_genes:
+            available_genes.append(x)
+    for x in list(df['symbol2']):
+        if x not in available_genes:
+            available_genes.append(x)
+
+    # check available genes
+    log_data = open(log_file, "w")
+    for g in genes:
+        if g not in available_genes:
+            log_data.write(f"MISSING DISTANCE INFORMATION FOR GENE {g}\n")
+    log_data.close()
+
+    # Trouver la paire avec la distance minimale
+    idxmin = df["distance"].idxmin()
+    root = df.loc[idxmin, "symbol1"]
+    second = df.loc[idxmin, "symbol2"]
+    d_root_second = df.loc[idxmin, "distance"]
+
+    # Positions initiales
+    positions = {root: 0, second: d_root_second}
+    visited = {root, second}
+    current = second
+
+    # Boucle jusqu'à visiter tous les gènes
+    while len(visited) < len(set(df["symbol1"]) | set(df["symbol2"])):
+        # Trouver la plus petite distance depuis le "current" vers un gène non visité
+        candidates = df[
+            ((df["symbol1"] == current) & (~df["symbol2"].isin(visited)))
+            | ((df["symbol2"] == current) & (~df["symbol1"].isin(visited)))
+        ]
+
+        if candidates.empty:
+            break  # bloqué (graphe non connexe)
+
+        next_idx = candidates["distance"].idxmin()
+        row = candidates.loc[next_idx]
+
+        if row["symbol1"] == current:
+            nxt = row["symbol2"]
+        else:
+            nxt = row["symbol1"]
+
+        # Position = position du current + distance
+        positions[nxt] = positions[current] + row["distance"]
+
+        # Avancer
+        visited.add(nxt)
+        current = nxt
+
+    # save data
+    data = []
+    for symbol in positions:
+        data.append({"GENE":symbol, 'POSITION':positions[symbol]})
+    df = pd.DataFrame.from_dict(data)
+    df.to_csv(position_file, index=False)
+
+    return positions
+        
+
+    
+    
+
 
 
 if __name__ == "__main__":
@@ -405,4 +499,5 @@ if __name__ == "__main__":
     
     # extract_order_from_protein_distances("data/fake_gene_data.csv", "data/9606.protein.links.v12.0.txt", "data/9606.protein.info.v12.0.txt", "/tmp/zog.log", "data/computed_positions.csv")
 
-    compute_gene_to_gene_distances("data/fake_gene_data.csv", "data/9606.protein.links.v12.0.txt", "data/stringdb_alias.txt", "data/gene_distances.csv")
+    # compute_gene_to_gene_distances("data/fake_gene_data.csv", "data/9606.protein.links.v12.0.txt", "data/stringdb_alias.txt", "data/gene_distances.csv")
+    m = extract_order_from_gene_distances("data/fake_gene_data.csv", "data/gene_distances.csv", "/tmp/pos.csv", "/tmp/log.txt")
