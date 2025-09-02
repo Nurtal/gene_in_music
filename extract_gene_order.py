@@ -335,8 +335,16 @@ def get_ensembl_genes(genes:list) -> dict:
     return gene_to_ensembl
 
 
-def compute_gene_to_gene_distances(data_file, link_file, alias_file, info_file, log_file):
-    """ """
+def compute_gene_to_gene_distances(data_file:str, link_file:str, alias_file:str, output_file:str) -> None:
+    """Use protein links and alias to craft a gene distance file
+
+    Args:
+        - data_file (str) : path to input data file, supposed to contains gene symbols as column, a first id column and a last label / group column
+        - link_file (str) : path to stringdb links file
+        - alias_file (str) : path to stringdb alias file
+        - output_file (str) : path to save file 
+    
+    """
 
     # load gene list
     df = pd.read_csv(data_file)
@@ -352,10 +360,36 @@ def compute_gene_to_gene_distances(data_file, link_file, alias_file, info_file, 
 
     # Mapp ENSG to ENSP
     aliases = pd.read_csv(alias_file, sep="\t", skiprows=1, names=["protein", "alias", "source"])
+    links = pd.read_csv(link_file, sep=" ")
     ensg_map = aliases[aliases["alias"].isin(ensg_list)][["alias", "protein"]]
-    print(ensg_map)
 
-    # compute distance
+    # extract score for all ENSP
+    proteins = ensg_map["protein"].unique().tolist()
+    sub_links = links[
+        (links["protein1"].isin(proteins)) & 
+        (links["protein2"].isin(proteins))
+    ].copy()
+
+    # add ENSG
+    prot_to_ensg = dict(zip(ensg_map["protein"], ensg_map["alias"]))
+    sub_links["gene1"] = sub_links["protein1"].map(prot_to_ensg)
+    sub_links["gene2"] = sub_links["protein2"].map(prot_to_ensg)
+
+    # Agréger au max par paire de gènes
+    gene_links = (
+        sub_links.groupby(["gene1", "gene2"])["combined_score"]
+        .max()
+        .reset_index()
+    )
+
+    # Convertir en distances
+    gene_links["distance"] = 1 - (gene_links["combined_score"] / 1000)
+
+    # save
+    gene_links.to_csv(output_file, index=False)
+
+
+    
 
 
 if __name__ == "__main__":
@@ -371,4 +405,4 @@ if __name__ == "__main__":
     
     # extract_order_from_protein_distances("data/fake_gene_data.csv", "data/9606.protein.links.v12.0.txt", "data/9606.protein.info.v12.0.txt", "/tmp/zog.log", "data/computed_positions.csv")
 
-    compute_gene_to_gene_distances("data/fake_gene_data.csv", "data/9606.protein.links.v12.0.txt", "data/stringdb_alias.txt", "data/9606.protein.info.v12.0.txt", "/tmp/zog.log")
+    compute_gene_to_gene_distances("data/fake_gene_data.csv", "data/9606.protein.links.v12.0.txt", "data/stringdb_alias.txt", "data/gene_distances.csv")
