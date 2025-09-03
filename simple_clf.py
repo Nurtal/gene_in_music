@@ -48,7 +48,7 @@ def run_svm_clf(file_list_1:list, file_list_2:list):
     
   
 
-def run_log_clf(file_list_1:list, file_list_2:list, J:int, Q:int, result_file:str, audio_duration:float) -> None:
+def run_log_clf(file_list_1:list, file_list_2:list, J:int, Q:int, result_file:str, audio_duration:float) -> float:
     """
     Simple exemple case, extract features from scats and used it to train a logistic regression
 
@@ -59,6 +59,9 @@ def run_log_clf(file_list_1:list, file_list_2:list, J:int, Q:int, result_file:st
         - Q (int) : scat features parameters 2
         - result_save (str) : path to the file for saving results
         - audio_duration (float) : duration of the audio samples (seconds)
+
+    Returns:
+        - (float) : auc
     
     """
 
@@ -103,6 +106,9 @@ def run_log_clf(file_list_1:list, file_list_2:list, J:int, Q:int, result_file:st
     output_file.write(f"ACC,{accuracy}\n")
     output_file.write(f"AUC,{auc}\n")
     output_file.close()
+
+    # return auc
+    return auc
 
 
 

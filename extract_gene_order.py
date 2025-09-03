@@ -37,7 +37,13 @@ def build_random_gene_order_from_data(data_file:str) -> dict:
     """Build random gene order from a data file (trash dev purpose)"""
 
     # extract gene in random order
-    df = pd.read_csv(data_file).drop(columns=['ID', 'LABEL'])
+    df = pd.read_csv(data_file)
+    cols_to_drop = []
+    cols = list(df.keys())
+    for c in cols:
+        if c in ['ID', 'LABEL', 'GROUP']:
+            cols_to_drop.append(c)
+    df = df.drop(columns=cols_to_drop)
     gene_list = list(df.keys())
     random.shuffle(gene_list)
     
